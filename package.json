@@ -1,0 +1,36 @@
+{
+    "name" : "@frdl/frdl.js", 
+    "description" : "frdl.js",
+    "keywords" : ["frdl", "frdlweb", "require-browser"],
+    "homepage" : "https://github.com/frdl/frdl.js",
+    "version" : "2.0.1",
+    "author" : {
+        "name" : "Till Wehowski",
+        "email" : "github@webfan.de",
+        "url" : "http://frdl.webfan.de"
+    },
+    "contributors" : [],
+    "config" : {
+        "HPS_ID" : "0",
+        "APP_ID" : "0"
+    },
+    "main" : "index.js", 
+   
+    "scripts" : { 
+      "test" : "tap test/"
+     },
+    "repository" : {
+        "type" : "git",
+        "url" : "http://github.com/frdl/frdl.js.git"
+    },
+    "bugs" : "http://github.com/frdl/frdl.js/issues",
+    "dependencies" : { 
+        
+    },
+    "licenses" : [
+        {
+            "type" : "MIT",
+            "url" : "http://www.opensource.org/licenses/mit-license.php"
+        }
+    ]
+}
