@@ -1,37 +1,113 @@
 {
-    "name" : "@frdl/frdl.js", 
-    "description" : "frdl.js",
-    "type" : "library",
-    "keywords" : ["frdl", "frdlweb", "require-browser"],
-    "homepage" : "https://github.com/frdl/frdl.js",
-    "version" : "2.0.1",
-    "author" : {
-        "name" : "Till Wehowski",
-        "email" : "github@webfan.de",
-        "url" : "http://frdl.webfan.de"
-    },
-    "contributors" : [],
-    "config" : {
-        "HPS_ID" : "0",
-        "APP_ID" : "0"
-    },
-    "main" : "index.js", 
-   
-    "scripts" : { 
-      "test" : "tap test/"
-     },
-    "repository" : {
-        "type" : "git",
-        "url" : "http://github.com/frdl/frdl.js.git"
-    },
-    "bugs" : "http://github.com/frdl/frdl.js/issues",
-    "dependencies" : { 
-        
-    },
-    "licenses" : [
-        {
-            "type" : "MIT",
-            "url" : "http://www.opensource.org/licenses/mit-license.php"
-        }
+  "name": "frdl",
+  "description": "frdl.js",
+  "type": "library",
+  "license": "MIT",
+  "keywords": [
+    "frdl",
+    "frdlweb",
+    "require-browser"
+  ],
+  "homepage": "https://github.com/frdl/frdl.js",
+  "version": "2.0.7",
+  "author": {
+    "name": "Till Wehowski",
+    "email": "github@webfan.de",
+    "url": "http://frdl.webfan.de"
+  },
+  "contributors": [],
+  "config": {
+    "HPS_ID": "0",
+    "APP_ID": "0"
+  },
+  "engines": {
+    "node": ">=9.10.1",
+    "npm": ">=5.4.0",
+    "yarn": ">=1.9.0"
+  },
+  "main": "server.js",
+  "scripts": {
+    "node": "node",
+    "start": "node ./server.js",
+    "rimraf": "rimraf",
+    "yarn": "yarn",
+    "npm": "npm",
+    "test": "tap test/",
+    "prepublishOnly": "npm run package:refresh && npm version patch",
+    "pre-install": "mkdir ./dist",
+    "post-install": "yarn && npm run post-install:legacy && webpack build",
+    "post-install:legacy": "node ./scripts/build-legacy.js legacy-build",
+    "package:refresh": "rimraf ./.env && rimraf ./node_modules && rimraf ./dist && rimraf ./package-lock.json && rimraf ./yarn.lock",
+    "installEX": "scripts/installEx.js"
+  },
+  "repository": "frdl/frdl.js",
+  "bugs": "http://github.com/frdl/frdl.js/issues",
+  "workspaces": {
+    "hps": [
+      "**/.hps/**/app/**",
+      "**/.hps/**/modules/**",
+      "**/.hps/**/var/**",
+      "**/.hps/**/node_modules/**",
+      "**/.hps/**/app/**"
+    ],
+    "webfan": [
+      "**/.uid/**/WORKSPACE/**"
+    ],
+    "vhost": [
+      "**/_hosts/**"
+    ],
+    "nohoist": [
+      "**/frdl/**",
+      "**/frdlweb/**",
+      "**/server-frdl-de/**",
+      "**/git/**",
+      "**/weakref/**",
+      "node_modules/**"
     ]
+  },
+  "dependencies": {
+    "chalk": "*",
+    "co": "*",
+    "co-prompt": "*",
+    "dotenv": "*",
+    "dotenv-webpack": "*",
+    "fs-extra": "*",
+    "jayson": "*",
+    "superagent": "*",
+    "yarn": "^1.12.3",
+    "twig": "*",
+    "connect": "*",
+    "express": "*",
+    "vhost": "*",
+    "ack-host": "*"
+  },
+  "devDependencies": {
+    "rimraf": "*"
+  },
+  "peerDependencies": {
+    "@angular/common": "^6.0.0",
+    "@angular/compiler": "^6.0.0",
+    "@angular/core": "^6.0.0",
+    "@angular/platform-browser": "^6.0.0",
+    "@angular/platform-browser-dynamic": "^6.0.0",
+    "@angular/upgrade": "^6.0.0",
+    "@uirouter/angular-hybrid": "^6.0.0",
+    "@uirouter/core": "^5.0.21",
+    "@uirouter/visualizer": "^6.0.2",
+    "clean-webpack-plugin": "*",
+    "css-loader": "*",
+    "frdlweb": "*",
+    "server-frdl-de": "*",
+    "html-webpack-plugin": "*",
+    "style-loader": "*",
+    "webpack": "*",
+    "webpack-cli": "*",
+    "webpack-manifest-plugin": "*"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://www.opensource.org/licenses/mit-license.php"
+    }
+  ]
 }
