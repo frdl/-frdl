@@ -1,2 +1,6 @@
 # @frdl/frdl.js
-frdl/frdl.js/µFlow2
+
+````
+  $  npm i frdl
+  $  npm run post-install:legacy app.js --host=test.webfan.de --hash=v123    
+````    
