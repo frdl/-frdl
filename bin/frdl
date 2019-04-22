@@ -1,0 +1,26 @@
+#! /usr/bin/env node
+/*! @ frdl.Frdlweb.js.Compiler.es6 : no */
+/*! @ frdl.Frdlweb.js.Compiler.defaultPlugin : frdlcjs */
+
+
+
+
+var Frdlweb = require('./frdlweb');
+console.log('frdl://'+process.cwd() + ' >');
+ //console.log('Frdlweb', Frdlweb);
+
+//if(typeof define !== 'function'){ 
+// var define = (require('amdefine'))(module); 
+//}
+
+//if(exports){
+//  define(function(){
+//       return Frdlweb;	
+//  });	
+//}else{
+	Frdlweb.exec(process.argv, process.cwd())
+        .then(function(out){
+             console.log(out);
+        });
+    ;
+//}

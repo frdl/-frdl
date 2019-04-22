@@ -8,8 +8,11 @@
     "frdlweb",
     "require-browser"
   ],
+  "bin": {
+    "frdl": "./bin/frdl"
+  },
   "homepage": "https://github.com/frdl/frdl.js",
-  "version": "2.0.7",
+  "version": "2.0.13",
   "author": {
     "name": "Till Wehowski",
     "email": "github@webfan.de",
@@ -25,19 +28,20 @@
     "npm": ">=5.4.0",
     "yarn": ">=1.9.0"
   },
-  "main": "server.js",
+  "main": "index",
   "scripts": {
     "node": "node",
     "start": "node ./server.js",
+    "frdl": "node ./bin/frdl",
     "rimraf": "rimraf",
     "yarn": "yarn",
     "npm": "npm",
     "test": "tap test/",
     "prepublishOnly": "npm run package:refresh && npm version patch",
     "pre-install": "mkdir ./dist",
-    "post-install": "yarn && npm run post-install:legacy && webpack build",
+    "post-install": "yarn && npm link",
     "post-install:legacy": "node ./scripts/build-legacy.js legacy-build",
-    "package:refresh": "rimraf ./.env && rimraf ./node_modules && rimraf ./dist && rimraf ./package-lock.json && rimraf ./yarn.lock",
+    "package:refresh": "rimraf ./.env && rimraf ./node_modules && rimraf ./dist && rimraf ./package-lock.json && rimraf ./yarn.lock && rimraf ./npm-debug.log && rimraf ./yarn-debug.log && rimraf ./yarn-error.log",
     "installEX": "scripts/installEx.js"
   },
   "repository": "frdl/frdl.js",
@@ -66,44 +70,37 @@
     ]
   },
   "dependencies": {
+    "ack-host": "*",
+    "amdefine": "^1.0.1",
+    "angular": "~1.3.8",
+    "angular-terminal": "1.0.0",
+    "angular-translate": "2.18.1",
+    "axios": "^0.18.0",
     "chalk": "*",
     "co": "*",
     "co-prompt": "*",
+    "connect": "*",
     "dotenv": "*",
     "dotenv-webpack": "*",
+    "edit-json-file": "^1.2.1",
+    "express": "*",
     "fs-extra": "*",
     "jayson": "*",
+    "jquery-mousewheel": "*",
+    "jquery.terminal": "*",
+    "jszip": "^3.1.5",
+    "optparse": "^1.0.5",
+    "shelljs": "^0.8.3",
     "superagent": "*",
-    "yarn": "^1.12.3",
+    "try-require": "^1.2.1",
     "twig": "*",
-    "connect": "*",
-    "express": "*",
     "vhost": "*",
-    "ack-host": "*"
+    "yarn": "^1.12.3"
   },
   "devDependencies": {
-    "rimraf": "*"
+    "rimraf": "^2.6.2"
   },
-  "peerDependencies": {
-    "@angular/common": "^6.0.0",
-    "@angular/compiler": "^6.0.0",
-    "@angular/core": "^6.0.0",
-    "@angular/platform-browser": "^6.0.0",
-    "@angular/platform-browser-dynamic": "^6.0.0",
-    "@angular/upgrade": "^6.0.0",
-    "@uirouter/angular-hybrid": "^6.0.0",
-    "@uirouter/core": "^5.0.21",
-    "@uirouter/visualizer": "^6.0.2",
-    "clean-webpack-plugin": "*",
-    "css-loader": "*",
-    "frdlweb": "*",
-    "server-frdl-de": "*",
-    "html-webpack-plugin": "*",
-    "style-loader": "*",
-    "webpack": "*",
-    "webpack-cli": "*",
-    "webpack-manifest-plugin": "*"
-  },
+  "peerDependencies": {},
   "licenses": [
     {
       "type": "MIT",

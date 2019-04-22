@@ -1,0 +1,346 @@
+/*! @ frdl.Frdlweb.js.Compiler.es6 : no */
+/*! @ frdl.Frdlweb.js.Compiler.defaultPlugin : frdlcjs */
+
+
+if(typeof define !== 'function'){ 
+ require('amdefine');
+ 	
+ var define = (require('amdefine'))(module); 
+}
+
+
+
+
+
+define( ['require', 'exports', 'module', 'try-require',  'co', 'optparse', 'co-prompt', 'fs', 'axios'], function(require, exports, module, tryRequire, co, optparse, prompt, fs, axios){
+ 'use strict';
+	
+function Frdlweb(dir){
+	this.pkg = false; 
+	this.projectDirectory(dir);
+	this.optparse = optparse;
+}
+
+const packageFile = 'package.json';	
+var shell = tryRequire("shelljs");
+var cd = ('undefined' === typeof shell) ? (('undefined'!==typeof fs.filer && 'function'===typeof frdl.fs.filer.cd) ? frdl.fs.filer.cd : process.cwd) : shell.cd;
+
+//var projectDirectory = ('undefined'!==typeof __dirname && process.cwd() === __dirname) ? __dirname + '/../../' : process.cwd();
+var projectDirectory = process.cwd();
+Frdlweb.prototype.projectDirectory=function(d){
+	if('undefined'!==typeof d){
+		projectDirectory = d;
+	}
+	
+	return projectDirectory;
+};
+/*
+Frdlweb.prototype.packageFile=function(d){
+	return require("edit-json-file")(this.projectDirectory() + '/package.json');
+};
+*/
+
+Frdlweb.prototype.preg_quote=preg_quote;
+Frdlweb.prototype.extractTextBetween=extractTextBetween;
+Frdlweb.prototype.tokenize=tokenize;
+
+Frdlweb.prototype.readPackageFile=function(){	
+  var file = this.projectDirectory() + '/' + packageFile, THAT = this;	
+  //fs.exists(file, function(exists){
+	//if(!exists){
+	//	THAT.pkg = false;  
+     //      console.log('Not found: %s', file );
+	//}else{
+		fs.readFile(file, (err, data) => {
+               if (err){
+                //throw err;
+                  console.war('Error: %s', err );
+                   return;
+               }
+                  THAT.pkg = JSON.parse(data);
+        });
+	//}
+ //});	
+};	
+	
+module.exports=Frdlweb;
+module.exports.instance = new Frdlweb(process.cwd());
+module.exports.exec = function(a, dir){
+	var instance = new Frdlweb(dir || process.cwd());
+
+       instance.readPackageFile();
+        console.log( 'instance.pkg', instance.pkg);
+
+
+	if('undefined'===typeof a && 'undefined'!==typeof process.argv ){
+	  var a=process.argv;	
+	}
+
+	if('object' === typeof a && a instanceof Array ){
+	//  a = a.join(' ');	
+		
+	}
+	
+	if('string'===typeof a ){
+	  a = tokenize(a, true);	
+	}
+
+	if('undefined'!==typeof process.shim && 'frdl' === process.shim && ('undefined'===typeof process.argv || process.argv !== a)){
+	  process.argv = a;	
+	}
+
+
+       a = a.slice(2);
+       if(0<a.length  && 'frdl' === a[0]){
+		  a.shift();			 
+	   }
+
+
+
+     var SWITCHES = [   
+         ['-h', '--help', "Shows this help message"],
+         ['--test [TEXT]', "Test something"],
+         ['--cwd [cwd]', "Test something"],
+		 ['-d', '--debug [BOOLEAN]',  "Switch debug mode"],
+         ['--date [DATE]', "A date. A date is expected E.G. 2019-01-14"],
+     ];
+
+ 
+    var parser = new optparse.OptionParser(SWITCHES), print_summary = true, Buff = null, 
+         first_arg;
+         parser.banner = 'Installation: $ npm install frdl\nUsage: $ frdl [options]';
+			 ;
+
+        var options = {
+             debug: process.env.DEBUG || false,
+             files: [],
+			 cwd : dir || process.cwd(),
+             number: undefined,
+             date: undefined,
+             callbacks : []
+        }, cbk = function(cb, k){
+             if('undefined'===typeof k && 'undefined'!==typeof cb){
+                options.callbacks.push(cb);  
+                var k = options.callbacks.length;  
+             }else if('undefined'!==typeof k && 'undefined'!==typeof cb){
+                options.callbacks[k] = cb;                
+             }
+					 
+			return options.callbacks[k];		 
+        };
+
+
+
+
+
+
+
+
+    return new Promise(function(resolve, reject){
+
+
+
+         
+         
+       //  console.log( 'axios', axios); 
+      //   console.log( 'optparse', optparse); 
+      //   console.log( 'prompt', prompt); 
+	  //   console.log( 'exec(argv)', a);
+	 //    console.log( 'shell', shell);
+
+		
+		 parser.filter('BOOLEAN', filter_boolean);			
+		
+		
+         parser.on(0, function(value) {
+              first_arg = value;
+         });
+
+         parser.on('help', function() {
+             cbk(parser.toString());
+             print_summary = false;
+             parser.halt(function() {
+	            cbk('help done.');
+             });
+			 
+			 parser.halt();
+          });
+
+        
+
+		
+         parser.on('date', function(name, value) {
+			  if(parser._halt)return;
+                 options.date = value;
+         });
+
+         parser.on('test', function(name, value) {
+			  if(parser._halt)return;
+		          cbk(function(){					 
+					  var s = 'test : ' + value;
+                    //  console.log(s);
+					  co(function *() { 
+					       yield [1,2,3];
+					  });  
+			
+					  return s;
+                 }, undefined);
+			 
+			    
+          });
+
+
+		parser.on('cwd', function(name, value) {
+			if('string' === value && value !== options.cwd)	{
+				cd(value);				
+				process.cwd(value);
+				options.cwd = process.cwd(); 	 
+			}
+			Buff = options.cwd;
+			cbk('$ cwd >' + options.cwd, undefined);
+        });
+
+		parser.on('debug', function(name, value) {
+		   options.debug = ('undefined' === value) ? true : filter_boolean(value);
+        });
+
+					 
+					 
+			parser.on('*', function(opt, value) {
+			 if(parser._halt)return;
+		      cbk('option=' + opt + ', value=' + value, undefined);
+            });				 
+	     	 
+					 
+					 
+					 
+					 
+					 
+         parser.parse(a);
+		
+	  
+	if(print_summary) {
+       cbk("First non-switch argument is: " + first_arg);
+    
+    // Output all files that was included.
+       cbk("No of files to handle: " + options.files.length);
+       for(var i = 0; i < options.files.length; i++) {
+            cbk("File [" + (i + 1) + "]:" + options.files[i]);
+       }
+
+       // Is debug-mode enabled?
+       cbk("Debug mode is set to: " + options.debug);
+
+       cbk("Number value is: " + options.number);
+       cbk("Date value is: " + options.date);
+											   
+	   								   
+    }  
+		
+		
+			var out = '', buf;			 
+				
+				options.callbacks.forEach(function(v,i){
+			    	buf = v;
+				     while('function'===typeof buf){
+				      	buf = buf([parser, options]);
+			        }
+					 
+				    out += 	('string'===typeof buf) ? buf : buf.toString(); 
+				    out += '\n';				 
+				});
+					 
+					 
+          		 
+					 
+					  co(function *() { 
+					       yield prompt('Press ENTER to continue!'); 
+                           resolve(out);
+					  });  
+					 
+        
+    });
+};
+	
+
+
+
+
+
+function filter_boolean(value) {
+		if('boolean' === typeof value)return value;
+		if(1 === value || '1' === value || 'true' === value.toLowerCase() ||  'yes' === value.toLowerCase() ||  'on' === value.toLowerCase() ){
+		  return true;			 
+		}
+					 
+		if(0 === value || '0' === value || 'false' === value.toLowerCase() ||  'no' === value.toLowerCase() ||  'off' === value.toLowerCase()	){
+		  return true;			 
+		}
+					 
+	//  if(value.length != 1) throw "Filter mismatch.";
+	  return true === value;
+}
+
+
+
+
+
+
+
+
+
+
+function tokenize(str, lookForQuotes) {
+        var args = [];
+        var readingPart = false;
+        var part = '';
+        for(var i=0; i<str.length; i++) {
+            if(str.charAt(i) === ' ' && !readingPart) {
+                if(''!==part)args.push(part);
+                part = '';
+            } else {
+                if(('undefined'===typeof lookForQuotes || !!lookForQuotes) && (str.charAt(i) === '\"' || str.charAt(i) === "\'")) {
+                    readingPart = !readingPart;
+                } else {
+                    part += str.charAt(i);
+                }
+            }
+        }
+        if(''!==part)args.push(part);
+        return args;
+}
+
+function preg_quote (str, delimiter) {
+
+
+    // Quote regular expression characters plus an optional character  
+    // 
+    // version: 1107.2516
+    // discuss at: http://phpjs.org/functions/preg_quote
+    // +   original by: booeyOH
+    // +   improved by: Ates Goral (http://magnetiq.com)
+    // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+    // +   bugfixed by: Onno Marsman
+    // +   improved by: Brett Zamir (http://brett-zamir.me)
+    // *     example 1: preg_quote("$40");
+    // *     returns 1: '\$40'
+    // *     example 2: preg_quote("*RRRING* Hello?");
+    // *     returns 2: '\*RRRING\* Hello\?'
+    // *     example 3: preg_quote("\\.+*?[^]$(){}=!<>|:");
+    // *     returns 3: '\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:'
+    
+    return (str + '').replace(new RegExp('[.\\\\+*?\\[\\^\\]$(){}=!<>|:\\' + (delimiter || '') + '-]', 'g'), '\\$&')
+               //     .replace(/(\s)/, "\s")
+;
+}
+
+
+function extractTextBetween(subject, start, end) {
+    try{
+        return subject.split(start)[1].split(end)[0];
+    } catch(e){
+        console.log("Exception when extracting text", e);
+    }
+}
+	
+});

@@ -1,0 +1,24 @@
+#! /usr/bin/env node
+
+
+
+var frdl = frdl || require('./../').instance;
+var prompt = prompt || require('co-prompt');
+var fs = require('fs');
+
+console.log('Init...');
+
+
+
+
+fs.exists(frdl.projectDirectory() + '/frdlweb.json', function(exists){
+	if(exists){
+		throw new Error(frdl.projectDirectory() + '/frdlweb.json' + ' exists already');
+		
+	}
+	 console.log(' exists /frdlweb.json', exists);
+});	
+	
+	
+
+
