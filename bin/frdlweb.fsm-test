@@ -1,3 +1,4 @@
+#! /usr/bin/env node
 /*! @ frdl.Frdlweb.js.Compiler.es6 : no */
 /*! @ frdl.Frdlweb.js.Compiler.defaultPlugin : frdlcjs */
 
@@ -161,16 +162,14 @@ try{
 
 
  program	
- // .version( require('./../package.json').version)
-	//"2.0.22"
- .version( "2.0.22" )
+  .version('0.1.0')
   .description('frdl cli')
   .command('test [url]', 'test toc URL')
   .command('bundlejs [entry]', 'build javascript bundle(s)')
  ;
 
 
-/*
+
   var cliFlow;
   cliFlow = new machina.BehavioralFsm( {
 
@@ -338,7 +337,7 @@ cliFlow.on("tests", function (eventName, data){
    //  cliFlow. invoke(program);
 	// console.log("cliFlow", cliFlow);
 	
-*/
+
 
 
 program.on('option:verbose', function () {
@@ -346,9 +345,9 @@ program.on('option:verbose', function () {
 });
 
 program.on('option:*', function () {
-    // console[(process.env.VERBOSE ? 'error' : 'warn')]('Unknown option: %s\nSee --help for a list of available option.', program.args.join(' '));
+  console[(process.env.VERBOSE ? 'error' : 'warn')]('Unknown option: %s\nSee --help for a list of available option.', program.args.join(' '));
   if(process.env.VERBOSE){
-    // process.exit(1);
+     process.exit(1);
   }
 });
 
@@ -356,9 +355,9 @@ program.on('option:*', function () {
 
 // error on unknown commands
 program.on('command:*', function () {
-   //console[(process.env.VERBOSE ? 'error' : 'warn')]('Invalid command: %s\nSee --help for a list of available commands.', program.args.join(' '));
+  console[(process.env.VERBOSE ? 'error' : 'warn')]('Invalid command: %s\nSee --help for a list of available commands.', program.args.join(' '));
   if(process.env.VERBOSE){
-   //  process.exit(1);
+     process.exit(1);
   }
 });
 
@@ -371,13 +370,13 @@ program.on('--help', function(){
   console.log('  $ custom-help --help');
   console.log('  $ custom-help -h');
 });
- program.addImplicitHelpCommand();	
+// program.addImplicitHelpCommand();	
 	
 
-//program.outputHelp(function(help) {
-//	console.log(help);
-//	return help;
-//});
+program.outputHelp(function(help) {
+	console.log(help);
+	return help;
+});
    
  return F;	
  
@@ -396,7 +395,7 @@ program.on('--help', function(){
    
        var configs = Promise.all([instance.readPackageFile(), instance.readConfigFile()])
 			.then(function(cnfs){		
-	                // var i = cliFlow.invoke(instance);
+	                 var i = cliFlow.invoke(instance);
 					 configs = cnfs; 
             }).catch(function(e){
 			        console.warn('e', e);
@@ -408,10 +407,8 @@ program.on('--help', function(){
 	  //   console.log('configs', typeof configs);
 
 
-         //  cliFlow.read(instance);
-	       program.parse(instance.argv); 
-		   
-		   
+           cliFlow.read(instance);
+	   
         return errors;/* new Promise(function(yes,no){
                           yes(true);
                        });*/

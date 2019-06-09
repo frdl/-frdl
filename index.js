@@ -1,1 +1,4 @@
-exports = module.exports = require('./bin/frdlweb');
+
+// exports = module.exports = require('./../frdl@functions');
+exports = module.exports = require('@frdl/functions');
+

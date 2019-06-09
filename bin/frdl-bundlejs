@@ -1,0 +1,57 @@
+#! /usr/bin/env node
+/*! @ frdl.Frdlweb.js.Compiler.es6 : no */
+/*! @ frdl.Frdlweb.js.Compiler.defaultPlugin : frdlcjs */
+
+ 
+if(typeof define !== 'function'){ 
+ var define = (require('amdefine'))(module); 
+}
+
+
+define( [ 'try-require',  'co',  'co-prompt',  'axios', 'subarg', 'commander', 'clone'], 
+	   function( tryRequire, co,prompt, axios, subarg, program, clone ){
+ 'use strict';
+	
+	
+var shell = tryRequire("shelljs");
+//var program = clone(p);
+//var program = p;
+	
+function FF(file){
+  console.log(file);	
+}
+	
+	
+program
+   .usage('frdl bundlejs <entry> [options] \n\tRegister Workspace: \n\t\tVisit the link to register a worspace/domain: https://frdl.webfan.de/?op=webaccount&task=new_blog#new_blog')
+	.arguments('bundlejs [[entry]]')
+ // .version('0.1.0')
+
+	.option('-n, --name [module]', 'name of destination library/module')
+	
+	.option('-W, --workspace [host]', 'select api-host, e.g. "frdl", or "24" (omit .webfan.de)')
+	.option('-d, --dist [dist]', 'build/dist -directory (for output)')
+	.option('-b, --base [base]', 'base-uri/web-path of application')
+	.option('-a, --assets [assets]', 'assets-path of application')
+// must be before .parse() since
+// node's emit() is immediate
+ 
+  .action(function(entry) {
+
+	require('./../build.js')(entry,  program.name, program.workspace, program.dist, program.base, program.assets, process.cwd()); 
+
+	  
+  })
+	;
+//console.log('shell', shell);
+if('undefined'===typeof shell){
+ 	
+}else{
+   program.parse(process.argv);
+}
+
+
+ 
+	
+	return program;
+});

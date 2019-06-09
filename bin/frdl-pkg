@@ -1,0 +1,66 @@
+#! /usr/bin/env node
+/*! @ frdl.Frdlweb.js.Compiler.es6 : no */
+/*! @ frdl.Frdlweb.js.Compiler.defaultPlugin : frdlcjs */
+/*
+const { exec } = require('pkg')
+exec([ process.argv[2], '--target', 'host', '--output', 'app.exe' ]).then(function() {
+    console.log('Done!')
+}).catch(function(error) {
+    console.error(error)
+})
+*/
+ 
+if(typeof define !== 'function'){ 
+ var define = (require('amdefine'))(module); 
+}
+
+
+define( [ 'try-require',  'co',  'co-prompt',  'axios', 'subarg', 'commander', 'clone', 'pkg'], 
+	   function( tryRequire, co,prompt, axios, subarg, program, clone, pkg ){
+ 'use strict';
+
+var options = {
+
+};
+
+	
+var shell = tryRequire("shelljs");
+//var program = clone(p);
+//var program = p;
+	
+function FF(file){
+  console.log(file);	
+}
+	
+	
+program
+  .arguments('<entry>')
+  .option('-t, --target [target]', 'specify target(s)')
+  .option('-o, --output', 'specify output')
+
+	
+// must be before .parse() since
+// node's emit() is immediate
+
+  .action(function(entry) {
+	var args = Array.prototype.splice(arguments);
+	
+	console.log('args', args);
+	console.log('entry', entry);
+
+	console.log('process.argv', process.argv);
+	  
+  })
+	;
+//console.log('shell', shell);
+if('undefined'===typeof shell){
+ 	
+}else{
+   program.parse(process.argv);
+}
+
+
+ 
+	
+	return program;
+});

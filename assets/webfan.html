@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+ <title>
+	 <%= htmlWebpackPlugin.options.title %>
+ </title>
+	 
+<link rel="shortcut icon" href="/favicon.ico?c=<%= htmlWebpackPlugin.options.hash_hps %>" type="image/x-icon">
+	 
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="lightblue" />
+<meta name="HandheldFriendly" content="true" />
+<meta name="MobileOptimized" content="320" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+	
+<meta http-equiv="expires" content="0">
+<meta name="revisit-after" content="1 DAYS">
+<meta name="robots" content="index, FOLLOW">
+<meta name="generator" content="https://webfan.de">
+
+	
+
+<style>* { margin: 0.1em; margin-left: 0.1em; padding-right: 0.1em; } [ng:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], [ng-cloack], .ng-cloak, .x-ng-cloak { display: none !important; } [webfan-fadeout].img-precloak, [webfan-fadeout].with-ico{ background : url(https://cdn.webfan.de/ajax-loader_2.gif) no-repeat 25% 50%; } webfan-model { display: none !important; } error, [error], .error { color:red; display : inline-block; } error { font-size:1.3em; } .editable-hide { display: none !important; } .d-rel-inline-block { position:relative; display:inline-block; } .f-right { float:right; } .f-left { float:left; } .f-top { float:top; } .f-bottom { float:bottom; } .f-center { float:center; } .admin-nav { list-style : none; margin:3px; padding:1px; display:inline; } .btn-ham{ position:absoulute; left:-8px; font-weight:bold; font-size:2em; } .active { font-weight: bold; } 
+</style>	
+	
+	
+	
+	
+	
+<style type="text/css">
+.fill-height{
+  display: flex;
+  flex: 1;
+  min-height: 100%;
+}
+
+.fill-height > div{
+  min-height: 100%;
+  display: flex;
+}
+
+md-sidenav {
+  overflow: visible;
+  
+}
+.side-menu, .side-menu ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 0;
+}
+
+.side-menu .md-button.active {
+  color: deeppink;
+}
+
+.side-menu .menu-toggle-list a.md-button {
+  display: block;
+  padding: 0 16px 0 32px;
+  text-transform: none;
+  text-rendering: optimizeLegibility;
+  font-weight: 500;
+}
+
+.side-menu .menu-toggle-list .md-button {
+  display: block;
+  padding: 0 16px 0 32px;
+  text-transform: none;
+}
+
+.side-menu > li {
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.md-button-toggle .md-toggle-icon.toggled {
+  transform: rotateZ(180deg);
+  -webkit-transform: rotateZ(180deg);
+}
+
+.side-menu .md-button-toggle .md-toggle-icon {
+  background-size: 100% auto;
+  display: inline-block;
+  margin: auto 0 auto auto;
+  width: 15px;
+  color: darkgray;
+  transition: transform .3s ease-in-out;
+  -webkit-transition: -webkit-transform .3s ease-in-out;
+}
+
+.menu-toggle-list.ng-hide {
+  max-height: 0;
+}
+
+.side-menu .md-button {
+  border-radius: 0;
+  color: inherit;
+  cursor: pointer;
+  font-weight: 400;
+  line-height: 40px;
+  margin: 0;
+  max-height: 40px;
+  overflow: hidden;
+  padding: 0px 16px;
+  text-align: left;
+  text-decoration: none;
+  white-space: normal;
+  width: 100%;
+}
+
+.menu-toggle-list {
+  background: #fff;
+  max-height: 300px;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  -webkit-transition: 0.75s cubic-bezier(0.35, 0, 0.25, 1);
+  -webkit-transition-property: max-height;
+  -moz-transition: 0.75s cubic-bezier(0.35, 0, 0.25, 1);
+  -moz-transition-property: max-height;
+  transition: 0.75s cubic-bezier(0.35, 0, 0.25, 1);
+  transition-property: max-height;
+}
+
+
+.side-menu menu-toggle span{
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+</style>	
+
+	
+</head>
+<body>	
+	
+	
+<my-app ng-cloak>
+<div>
+<div>	
+    <div class="fill-height">
+      <div ui-view=""><span webfan-fadeout="1000" class="with-ico" style="width:32px;height:32px;">&nbsp;&nbsp;&nbsp;</span></div>
+    </div>
+</div>	 
+</div>	
+</my-app>
+	
+
+	
+<script type="text/javascript">
+//frdl=frdlweb.frdl;
+process.ready(function(){	
+require(['angular-frdl', 'material'], function(angular, ngMaterial){
+	
+
+(function(){
+  'use strict';
+  
+  angular.module('common.services', []);
+  angular.module('myMenuApp.controllers', ['common.directives']);
+  angular.module('common.directives', ['common.services']);
+})();  
+  
+	
+(function () {
+
+  'use strict';
+
+// Declare app level module which depends on filters, and services
+
+  angular.module('myMenuApp', [
+    'myMenuApp.controllers',
+    'ngAnimate',
+    'ui.router',
+    'ngMaterial',
+    'ngAria',
+    'material.svgAssetsCache',
+  ])
+    .config(['$locationProvider', '$sceProvider', '$mdIconProvider', '$mdThemingProvider', function ($locationProvider, $sceProvider, $mdIconProvider, $mdThemingProvider) {
+	  
+		$locationProvider.html5Mode(false);    	  
+
+        $sceProvider.enabled(false);
+	  
+	  
+      $mdThemingProvider.theme('default')
+        .primaryPalette('light-blue', {
+          'default': '300'
+        })
+        .accentPalette('blue', {
+          'default': '300'
+        }) 
+		.warnPalette('red', {
+          'default': '300'
+        })
+        .backgroundPalette('grey', {
+          'default': '50'
+        })
+		;
+	  
+        $mdIconProvider
+           .defaultIconSet('https://frdl.webfan.de/cdn/application/webfan/node_modules/core-icons.svg', 16);	  
+    }])
+    .config(['$stateProvider', '$urlRouterProvider', '$logProvider', 
+    function ($stateProvider, $urlRouterProvider) {
+
+      $urlRouterProvider.otherwise("/");
+
+      $stateProvider
+        .state('home', {
+         url: '/',
+         //  abstract: true,
+          views: {
+            '@': {
+              templateUrl: 'home.view.html',
+              controller: 'HomeCtrl as vm'
+            },
+            'navbar@': {
+              template: 'navbar...home'
+			},	
+            'page@home': {
+               template: 'Hallo...home'
+            }			  
+          }
+        })
+		
+		///home.gettingstarted
+        .state('home.gettingstarted', {
+          url: '/gettingstarted',
+
+          views: {
+
+               'content@home': {
+		 //  	  'content': {
+               template: 
+				   '<h1>Getting started...</h1>' 
+			 // 	+ '<span webfan-fadeout="1000" class="with-ico" style="width:32px;height:32px;">&nbsp;&nbsp;&nbsp;</span>'
+			 // 	       + '<webfan-widget data-frdl-component="widget://components/frdlweb/whois"></webfan-widget>'
+            }
+          }
+        })		
+		
+		
+
+        .state('home.hps', {
+          url: 'homepagesystem',
+          abstract: true
+        })
+        .state('home.hps.dns', {
+          url: '/domainverfuegbarkeit',
+
+          views: {
+
+            'page@home': {
+               template: '<span webfan-fadeout="1000" class="with-ico" style="width:32px;height:32px;">&nbsp;&nbsp;&nbsp;</span>'
+				       + '<webfan-widget data-frdl-component="widget://components/frdlweb/whois-query"></webfan-widget>'
+            }
+          }
+        })
+		;
+
+		
+    }])
+    //take all whitespace out of string
+    .filter('nospace', function () {
+      return function (value) {
+        return (!value) ? '' : value.replace(/ /g, '');
+      };
+    })
+    //replace uppercase to regular case
+    .filter('humanizeDoc', function () {
+      return function (doc) {
+        if (!doc) return;
+        if (doc.type === 'directive') {
+          return doc.name.replace(/([A-Z])/g, function ($1) {
+            return '-' + $1.toLowerCase();
+          });
+        }
+        
+        return doc.label || doc.name;
+      };
+  })
+	
+	
+.component('frdlwebWhois', { 
+
+
+     selector : 'frdlweb-whois',
+     template :  `<form>
+
+	
+	
+
+<label for="whois-check" ng-bind="$ctrl.widget.preferences.msg.label"></label>
+<div class="input-group mb-3">
+  <div class="input-group-prepend">
+    <span class="input-group-text" id="whois-addon">https://www.</span>
+	<input type="text" autocomplete="domain" class="form-control" data-clear-btn="true"  ng-disabled="$ctrl.$searching"
+		   ng-model="$ctrl.query" placeholder="{{$ctrl.widget.preferences.placeholder}}" 
+		   id="whois-check" aria-describedby="whois-addon">  
+  </div>
+  
+	<button class="btn btn-primary" ng-bind="$ctrl.widget.preferences.msg.button" ng-disabled="$ctrl.$searching" ng-click="$ctrl.queryWhoisServer($ctrl.query)"></button>
+  <div>	
+	<a ng-href="{{$ctrl.domain.link_buy}}" ng-show="!$ctrl.$searching && true===$ctrl.domain.registered && true===$ctrl.domain.valid" class="btn btn-primary">
+	   {{$ctrl.domain.host}} zu uns umziehen
+	</a>
+	
+	<a ng-href="{{$ctrl.domain.link_buy}}" ng-show="!$ctrl.$searching && false===$ctrl.domain.registered && true===$ctrl.domain.valid" class="btn btn-success">
+	  {{$ctrl.domain.host}} jetzt sichern
+	</a>	
+  </div>	
+	<div ng-show="true!==$ctrl.domain.valid || (false!=$ctrl.widget.preferences.show.whois.info && !$ctrl.$searching && $ctrl.domain.info)" ng-bind-html="$ctrl.domain.info"></div>	
+</div>
+	
+</form> `, 
+
+     controller : ['$q', '$scope', '$element', '$compile', '$frdl', '$Webfan', '$sce', function frdlwebWhoisController($q, $scope, $element, $compile, $frdl, $Webfan, $sce){
+                  
+               var self = this;
+
+               self.widget = widget;
+               self.$searching = 0;  
+               self.path = function(name, params){			
+	              return location.protocol + '//' + process.env.FRDLWEB.ENDPOINT_BROWSER.SERVER.server.host + $Webfan.hps.Router.generate(name, params); 			
+	           };	
+
+
+                self.queryWhoisServer = function(q){
+	
+					if(!$frdl.strpos(q, '.') ){
+					    $frdl.alert.error( $frdl.inX.__(widget.preferences.errors.invalid.domain, [q]) + '!');
+						return;
+					}
+					
+					self.domain = {
+					         tld : q.split(/\./).reverse()[0],
+						     host : q.split(/\./).reverse()[1] + '.' + q.split(/\./).reverse()[0]
+					};
+					
+					
+					self.$searching++;
+					$frdl.UI.progress().start();
+					return $Webfan.hps.rpc.call('whois', [self.domain.host],function(e,r){
+						self.$searching--;
+						$frdl.UI.progress().complete();
+						if(e){
+						    frdl.alert.error(e);
+							return;
+						}
+					}).then(function(r){
+						if('undefined'!==typeof r.result){
+						    	self.domain.registered = r.result.registered;
+							    self.domain.info = $sce.trustAsHtml($frdl.base64_decode(r.result.info));
+							    self.domain.link_buy = widget.preferences.link.buy.href.replace(new RegExp(widget.preferences.link.buy.placeholder), self.domain.tld);
+							    self.domain.link_buy = self.domain.link_buy.replace(new RegExp(widget.preferences.link.buy.placeholder_domain), self.domain.host);
+							    self.domain.valid = !(/not supported/.test(self.domain.info));
+							    
+							    if(!self.domain.valid){
+									 $frdl.alert.error( $frdl.inX.__(widget.preferences.errors.invalid.domain, [q]) + '!');
+									 self.domain.info = $sce.trustAsHtml('<error>'+$frdl.inX.__(widget.preferences.errors.invalid.domain, [q])+'</error>');
+								}
+						}else{
+							
+							self.domain.info = $sce.trustAsHtml('<error>Unknown error</error>');
+						}
+						
+						$scope.$digest();
+					});
+				};
+
+//	 var bootstrap_enabled = ('undefined'!==typeof $ && typeof $().modal === 'function' && typeof $().emulateTransitionEnd === 'function');
+//	if(!bootstrap_enabled || widget.preferences.host !== location.host){	 
+
+//	}
+
+          
+  	   $frdl.getCSS('https://' + widget.preferences.host +'/cdn/application/webfan/node_modules/bootstrap-4/css/bootstrap-min.css');
+       $frdl.getCSS('https://' + widget.preferences.host +'/cdn/application/webfan/node_modules/angular-ui-select/ui-select.css');
+       $frdl.getCSS('https://' + widget.preferences.host +'/cdn/application/webfan/node_modules/angular-xeditable/xeditable.css');
+
+    
+}
+] 
+})	
+	;
+
+})();	
+	
+	
+	
+
+	
+(function(){
+  'use strict';
+  
+  angular.module('myMenuApp.controllers')
+
+.controller('HomeCtrl', [
+      '$rootScope',
+      '$log',
+      '$state',
+      '$timeout',
+      '$location',
+      'menu',
+      function ($rootScope, $log, $state, $timeout, $location, menu) {
+
+        var vm = this;
+
+
+        //functions for menu-link and menu-toggle
+        vm.isOpen = isOpen;
+        vm.toggleOpen = toggleOpen;
+        vm.autoFocusContent = false;
+        vm.menu = menu;
+
+        vm.status = {
+          isFirstOpen: true,
+          isFirstDisabled: false
+        };
+
+
+        function isOpen(section) {
+          return menu.isSectionSelected(section);
+        }
+
+        function toggleOpen(section) {
+          menu.toggleSelectSection(section);
+        }
+
+      }])
+})();
+	
+	
+	
+	
+	
+	
+	
+(function(){
+
+'use strict';
+
+  angular.module('common.services')
+  .factory('menu', [
+      '$location',
+      '$rootScope',
+      function ($location) {
+
+        var sections = [{
+          name: 'Getting Started',
+          state: 'home.gettingstarted',
+          type: 'link'
+        }];
+
+        sections.push({
+          name: 'Websites & Domains',
+          type: 'toggle',
+          pages: [{
+            name: 'Domainverfuegbarkeit',
+            type: 'link',
+            state: 'home.hps.dns',
+            icon: 'fa fa-group'
+          }/*, {
+            name: 'Porters',
+            state: 'home.beers.porters',
+            type: 'link',
+            icon: 'fa fa-map-marker'
+          },
+            {
+              name: 'Kontakt',
+              state: 'home.beers.wheat',
+              type: 'link',
+              icon: 'fa fa-plus'
+            }*/]
+        });
+/*
+        sections.push({
+          name: 'Munchies',
+          type: 'toggle',
+          pages: [{
+            name: 'Cheetos',
+            type: 'link',
+            state: 'munchies.cheetos',
+            icon: 'fa fa-group'
+          }, {
+            name: 'Banana Chips',
+            state: 'munchies.bananachips',
+            type: 'link',
+            icon: 'fa fa-map-marker'
+          },
+            {
+              name: 'Donuts',
+              state: 'munchies.donuts',
+              type: 'link',
+              icon: 'fa fa-map-marker'
+            }]
+        });
+*/
+        var self;
+
+        return self = {
+          sections: sections,
+
+          toggleSelectSection: function (section) {
+            self.openedSection = (self.openedSection === section ? null : section);
+          },
+          isSectionSelected: function (section) {
+            return self.openedSection === section;
+          },
+
+          selectPage: function (section, page) {
+            page && page.url && $location.path(page.url);
+            self.currentSection = section;
+            self.currentPage = page;
+          }
+        };
+
+        function sortByHumanName(a, b) {
+          return (a.humanName < b.humanName) ? -1 :
+            (a.humanName > b.humanName) ? 1 : 0;
+        }
+
+      }])
+      
+})();	
+	
+	
+	
+	
+	
+(function(){
+
+'use strict';	
+
+	var template = '<md-button class="md-button-toggle"\n' +
+        '  ng-click="toggle()"\n' +
+        '  aria-controls="docs-menu-{{section.name | nospace}}"\n' +
+        '  flex layout="row"\n' +
+        '  aria-expanded="{{isOpen()}}">\n' +
+        '  {{section.name}}\n' +
+        '  <span aria-hidden="true" class=" pull-right fa fa-chevron-down md-toggle-icon"\n' +
+        '  ng-class="{\'toggled\' : isOpen()}"></span>\n' +
+        '</md-button>\n' +
+        '<ul ng-show="isOpen()" id="docs-menu-{{section.name | nospace}}" class="menu-toggle-list">\n' +
+        '  <li ng-repeat="page in section.pages">\n' +
+        '    <menu-link section="page"></menu-link>\n' +
+        '  </li>\n' +
+        '</ul>\n' +
+        '';
+	
+	
+ angular.module('common.directives')
+  .run(['$templateCache', function ($templateCache) {
+      $templateCache.put('partials/menu-toggle.tmpl.html', template);
+    }])
+ .directive('menuToggle', ['$timeout', function ($timeout ) {
+      return {
+        scope: {
+          section: '='
+        },
+      //  templateUrl: 'partials/menu-toggle.tmpl.html',
+		template: template,  
+        link: function (scope, element) {
+          var controller = element.parent().controller();
+
+          scope.isOpen = function () {
+            return controller.isOpen(scope.section);
+          };
+          scope.toggle = function () {
+            controller.toggleOpen(scope.section);
+          };
+          
+          var parentNode = element[0].parentNode.parentNode.parentNode;
+          if (parentNode.classList.contains('parent-list-item')) {
+            var heading = parentNode.querySelector('h2');
+            element[0].firstChild.setAttribute('aria-describedby', heading.id);
+          }
+        }
+      };
+    }]);
+	
+	
+})();		
+	
+	
+	
+(function(){
+  'use strict';
+  
+	var template = '<md-button ng-class="{\'{{section.icon}}\' : true}" ui-sref-active="active" \n' +
+        '  ui-sref="{{section.state}}" ng-click="focusSection()">\n' +
+        '  {{section | humanizeDoc}}\n' +
+        '  <span  class="md-visually-hidden "\n' +
+        '    ng-if="isSelected()">\n' +
+        '    current page\n' +
+        '  </span>\n' +
+        '</md-button>\n' +
+        '';
+	
+  angular.module('common.directives')
+    .run(['$templateCache', function ($templateCache) {
+      $templateCache.put('partials/menu-link.tmpl.html', template);
+    }])
+    .directive('menuLink', function () {
+      return {
+        scope: {
+          section: '='
+        },
+    //    templateUrl: 'partials/menu-link.tmpl.html',
+		 template: template,
+        link: function ($scope, $element) {
+          var controller = $element.parent().controller();
+
+          $scope.focusSection = function () {
+            // set flag to be used later when
+            // $locationChangeSuccess calls openPage()
+            controller.autoFocusContent = true;
+          };
+        }
+      };
+    })
+})();	
+	
+    process.nextTick(function(){		
+//	require('frdlweb').frdl.bootAngularJs(document.querySelector('body'), ['myMenuApp']);
+		require('frdlweb').frdl.registerComponent('MyApp', {
+			//selector : 'my-app',
+			selector : 'body',
+			load :[ 
+				 {
+					   type : 'append',
+					   load : '<a title="Account" href="https://domainundhomepagespeicher.webfan.de/?op=webaccount" style="color:green;">Start...</a>'
+				   },
+	            	 {
+					   type : 'append-url',
+					   load : '/intro.html'
+				   },
+						
+				{			
+		      type : 'ba1',	
+			  load :	['common.services', 'common.directives', 'myMenuApp.controllers',
+					'myMenuApp']
+				
+			}
+				  
+		 ]	
+		});
+	});
+});	
+});
+</script>	
+	
+	
+</body>
+     
+</html>
