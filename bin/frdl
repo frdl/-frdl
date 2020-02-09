@@ -1,3 +1,3 @@
 #! /usr/bin/env node
 exports = module.exports =
-  require('./frdlweb')(process.argv, process.stdout);
+  require('./frdlweb').F(process.argv, process.stdout);

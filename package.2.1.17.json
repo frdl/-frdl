@@ -10,8 +10,8 @@
     "webfan",
     "development"
   ],
-  "homepage": "https://webfan.de/install/npm/",
-  "version": "2.5.1",
+  "homepage": "https://github.com/frdl/frdl.js",
+  "version": "2.1.17",
   "author": {
     "name": "Till Wehowski",
     "email": "github@webfan.de",
@@ -21,14 +21,36 @@
   "config": {
     "frdlweb": {}
   },
+  "engines": {
+    "node": ">=9.10.1",
+    "npm": ">=5.4.0",
+    "yarn": ">=1.9.0"
+  },
   "main": "index",
   "bin": {
     "frdl": "./bin/frdl",
     "frdlweb": "./bin/frdlweb"
   },
+  "browserify": {
+    "transform": "deamdify"
+  },
   "browser": {
     "fs": "./assets/node_modules/fs.js",
     "amdefine": "./assets/node_modules/amdefine.js"
+  },
+  "pkg": {
+    "assets": [
+      "assets/**/**",
+      "docs/**/**"
+    ],
+    "targets": [
+      "host",
+      "linux",
+      "macos",
+      "win",
+      "node9",
+      "node10"
+    ]
   },
   "scripts": {
     "build": "npm run build:browser-lib",
@@ -40,22 +62,53 @@
     "yarn": "yarn",
     "npm": "npm",
     "prepublishOnly": "npm run package:refresh && npm version patch",
-    "pre-install:legacy": "npm run package:refresh",
-    "post-install": "npm link",
-    "pre-install": "npm run pre-install:prepare-install",
+    "pre-install": "npm run package:refresh",
+    "post-install": "npm link && yarn",
     "post-install:legacy": "node ./scripts/build-legacy.js legacy-build",
     "package:refresh": "npm uninstall && rimraf ./.env && rimraf ./node_modules && rimraf ./dist && rimraf ./package-lock.json && rimraf ./yarn.lock && rimraf ./npm-debug.log && rimraf ./yarn-debug.log && rimraf ./yarn-error.log && rimraf ./.nyc_output && rimraf ./modules",
-    "installEX": "scripts/installEx.js",
-    "pre-install:prepare-install": "node ./prepare-install.js"
+    "installEX": "scripts/installEx.js"
   },
   "repository": "frdl/frdl.js",
   "bugs": "http://github.com/frdl/frdl.js/issues",
+  "workspaces": {
+    "default": [
+      "**/workspace/**"
+    ],
+    "hps": [
+      "**/.hps/**/app/**",
+      "**/.hps/**/modules/**",
+      "**/.hps/**/var/**",
+      "**/.hps/**/node_modules/**",
+      "**/.hps/**/app/**",
+      "**/.hps/**/config/**"
+    ],
+    "blog": [
+      "**/.hps/**"
+    ],
+    "webfan": [
+      "**/.uid/**/WORKSPACE/**"
+    ],
+    "vhost": [
+      "**/_hosts/**"
+    ],
+    "nohoist": [
+      ".hps/**",
+      "**/.hps/**",
+      "**/frdl/**",
+      "**/frdlweb/**",
+      "**/server-frdl-de/**",
+      "**/git/**",
+      "**/weakref/**",
+      "node_modules/**",
+      "modules/**"
+    ]
+  },
   "dependencies": {
-    "@babel/runtime": "latest",
-    "@babel/core": "latest",
+    "@babel/core": "^7.6.0",
     "@babel/plugin-syntax-dynamic-import": "latest",
-    "@babel/preset-env": "latest",
-    "@frdl/eventemitter": "latest",
+    "@babel/preset-env": "^7.6.0",
+    "@babel/runtime": "^7.6.0",
+    "@frdl/eventemitter": "^2.0.4",
     "@frdl/fs": "latest",
     "@frdl/functions": "latest",
     "@frdl/helper": "latest",
@@ -80,11 +133,9 @@
     "co": "*",
     "co-prompt": "*",
     "connect": "^3.7.0",
-    "copy-webpack-plugin": "^5.1.1",
-    "core-js": "3.6.4",
-    "core-js-compat": ">=3.6.0",
-    "core-util-is": ">=1.0.2",
+    "copy-webpack-plugin": "^5.0.3",
     "debug": "^4.1.1",
+    "dotenv": "*",
     "edit-json-file": "^1.2.1",
     "expose-loader": "^0.7.5",
     "extensioner": "^1.18.4",
@@ -97,16 +148,17 @@
     "insertion-query": "1.0.4",
     "jayson": "*",
     "jszip": "^3.2.2",
-    "locutus": "latest",
     "mimemessage": "^1.0.5",
     "module-to-cdn": "^3.1.2",
+    "npm-install-webpack-plugin": "^4.0.5",
+    "optparse": "^1.0.5",
     "php-parser": "*",
     "php-reflection": "*",
     "raw-loader": "^2.0.0",
     "ready-check": "latest",
     "recursive-readdir": "^2.2.2",
     "requirejs-webpack-plugin": "^1.0.5",
-    "resolve": "^1.14.1",
+    "resolve": "^1.11.0",
     "save-remote-file-webpack-plugin": "^1.0.2",
     "script-loader": "^0.7.2",
     "shelljs": "^0.8.3",
@@ -114,18 +166,19 @@
     "sliced": "^1.0.1",
     "subarg": "^1.0.0",
     "try-require": "^1.2.1",
-    "uglify-js": "^3.7.2",
+    "uglify-js": "^3.6.0",
     "uglifyjs-browser": "^3.0.0",
     "url": "0.11.0",
     "util": "0.12.0",
     "val-loader": "^1.1.1",
-    "webpack": "^4.41.5",
-    "webpack-inject-plugin": "*",
-    "webpack-pwa-manifest": "*",
-    "webpack-shell-plugin": "*"
+    "webpack": "^4.40.0",
+    "webpack-inject-plugin": "^1.5.0",
+    "webpack-pwa-manifest": "^4.0.0",
+    "webpack-shell-plugin": "^0.5.0"
   },
   "devDependencies": {
-    "rimraf": "^2.6.2"
+    "rimraf": "^2.6.2",
+    "yarn": "^1.12.3"
   },
   "peerDependencies": {},
   "licenses": [

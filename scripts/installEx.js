@@ -18,7 +18,7 @@ try{
    console.log('Note that if you like to install your modules in special location other then global you should prefix NODE_PATH with that location');
    process.exit(1);
 }
-var packageJson = require('./package');
+var packageJson = require('./../package.json');
 
 npm.load(packageJson, function (er, npm) {
    // use the npm object, now that it's loaded.

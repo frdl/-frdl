@@ -1,23 +1,31 @@
-/*! @ frdl.Frdlweb.js.Compiler.es6 : no */
-/*! @ frdl.Frdlweb.js.Compiler.defaultPlugin : frdlcjs */
-
 
 if(typeof define !== 'function'){ 
- var define = (require('amdefine'))(module); 
+  define = (require('amdefine'))(module); 
 }
 
-define( ['co',  'co-prompt',  'axios', 'subarg', 'commander', 'path', 'clone', './tokenize.js', 'machina', 'fs'], 
-	   function(  co, prompt, axios, subarg, program, path , clone, tokenize, machina, fs){
+define( ['try-require', 'co',  'co-prompt',  'axios', 'subarg', 'commander', 'path', 'clone', './tokenize.js'
+
+, 'fs'], 
+	   function( tryRequire,  co, prompt, axios, subarg, program, path , clone, tokenize
+	 
+	   , fs){
  'use strict'; 
  
 
-	
+var shell = tryRequire("shelljs");
+
 var errors = [];
 
 const packageFile = 'package.json';	
-const configFile = 'frdlweb.json';	
 
-
+const configFile = 'frdl.project.json';	
+	
+	
+exports = module.exports = {
+  F : F
+};  	
+	
+	
 var projectDirectory = process.cwd();
 Frdlweb.prototype.projectDirectory=function(d){
 	if('undefined'!==typeof d){
@@ -37,123 +45,40 @@ Frdlweb.prototype.readConfigFile=function(){
 var THAT =  this;
 return new Promise(function(resolve, reject){
   var file = THAT.projectDirectory()  + '/' + configFile;	
- 
- 
-try{
- 
-		  fs.readdir(THAT.projectDirectory() , function(err, entries){
-		   if(err){
-			   console.warn(err);
-			    THAT.cnf=false;							
-			   resolve(THAT.cnf);
-			   return;
-		   }
+	try{
+        THAT.cnf = require(file);
+        resolve(THAT.cnf);
+	}catch(e){
+        THAT.cnf = false;
+     
+        resolve(THAT.cnf);
 	
-			  if(-1 !== entries.indexOf(configFile) ){
-				  fs.readFile(file, function(err2, data2){
-                        if (err2){
-             
-                              console.log('Error: %s', err2 );
-                 
-							  THAT.cnf=false;
-							  resolve(THAT.cnf);
-                         }else{
-			   
-                               THAT.cnf = JSON.parse(data2);
-							   resolve(THAT.cnf);
-			             }
-			               
-                    });
-			  }else{
-								  THAT.cnf=false;
-							  resolve(THAT.cnf);			  
-			  }
-	  });
-			}catch(e){
-		  console.log('e: ' + e);
-		}  
-
- 
- }).catch(function(e){
-     console.error(e);
- });
+	}
+ });	
 };	
 	
 	
+Frdlweb.prototype.npmInit=function(){
+ var THAT =  this;
+ if(false === THAT.pkg){
+    shell.exec('npm init -y');
+ }
+};
 	
 Frdlweb.prototype.readPackageFile=function(){	
 var THAT =  this;
 return new Promise(function(resolve, reject){
   var file = THAT.projectDirectory() + '/' + packageFile;	
- 
-  //fs.exists(file, function(exists){
-	//if(!exists){
-	//	THAT.pkg = false;  
-     //      console.log('Not found: %s', file );
-	//}else{
-   
-try{
- //console.log('file: ' + file );
-		  fs.readdir(THAT.projectDirectory() , function(err, entries){
-		   if(err){
-			   console.warn(err);
-			    THAT.pkg=false;							
-			   resolve(THAT.pkg);
-			   return;
-		   }
-		///  console.log(entries);
-		   // resolve(entries);
-			  if(-1 !== entries.indexOf(packageFile) ){
-				  fs.readFile(file, function(err2, data2){
-                        if (err2){
-                //throw err;
-                              console.log('Error: %s', err2 );
-                 //  return;
-							  THAT.pkg=false;
-							  resolve(THAT.pkg);
-                         }else{
-			     // console.log('found: %s', file );
-                               THAT.pkg = JSON.parse(data2);
-							   resolve(THAT.pkg);
-			             }
-			               
-                    });
-			  }else{
-								  THAT.pkg=false;
-							  resolve(THAT.pkg);			  
-			  }
-	  });
-			}catch(e){
-		  console.log('e: ' + e);
-		}  
-	  /*	   
-    
-	  fs.readFile(file, (err, data) => {
-               if (err){
-                //throw err;
-                  console.log('Error: %s', err );
-                 //  return;
-               }else{
-			     // console.log('found: %s', file );
-                    THAT.pkg = JSON.parse(data);
-			  }
-			  resolve(THAT.pkg);
-        });
+	try{
+         THAT.pkg = require(file);
+         resolve(THAT.pkg);	
+	}catch(e){
+        THAT.pkg = false;
+      
+		  resolve(THAT.pkg);	
+		 
+	}
 
-		
-	  fs.readdir( THAT.projectDirectory() , function(err, entries){
-		   if(err){
-			   console.warn(err);
-			   return;
-		   }
-		  console.log(entries);
-	  });
-	*/
-	//}
- //});	
- 
- }).catch(function(e){
-     console.error(e);
  });
 };	
 
@@ -161,184 +86,17 @@ try{
 
 
  program	
- // .version( require('./../package.json').version)
-	//"2.0.22"
- .version( "2.0.22" )
-  .description('frdl cli')
+ .version( require('./../package.json').version )
+  .description('frdl command line tool (`frdl` ist the base-command)')
+  .command('boilerplate [templates]', 'build selected default components')
+  .command('bundlejs [entry]', 'build javascript bundle(s)')  
+  
   .command('test [url]', 'test toc URL')
-  .command('bundlejs [entry]', 'build javascript bundle(s)')
+
  ;
 
 
-/*
-  var cliFlow;
-  cliFlow = new machina.BehavioralFsm( {
 
-    initialize: function( options ) {
-        // your setup code goes here...
-    },
-
-    namespace: "cli-flow",
-
-    initialState: "uninitialized",
-	
-     states: {
-	 
-        uninitialized: {
-            "*": function( client ) {
-                //this.deferUntilTransition( client, 'listen' );
-				process.nextTick(function(){
-                  cliFlow.transition( client, "fresh" );
-				});
-            }
-        },
-		
-        fresh: {
-            "*": function(client) {
-                this.transition( client, "testing" );
-            }
-        },
-		
-        read: {
-            _onEnter: function(client) {
-                 this.handle( client, "in" );
-            },
-            "in": function(client) {
-                co(function*(){
-                  client.pAST = subarg(client.argv); 
-                     console.log(' client.pAST ',  client.pAST );
-                  return true;
-               }).then(function(){
-                   cliFlow.transition( client, "eval" );
-               });               
-               
-            },
-            _onExit: function(client) {
-              
-            }
-        },
-
-		
-        eval: {
-            _onEnter: function(client) {
-                 this.handle( client, "parse" );
-            },
-            "parse": function(client) {
-               co(function*(){
-			       co(function*(){
-                       program.parse(client.argv); 
-				   }); 
-                  return true;
-               }).then(function(){
-                  cliFlow.transition( client, "print" );
-               });
-            },
-            _onExit: function(client) {
-              
-            }
-        },
-	
-        print: {
-            _onEnter: function(client) {
-                 this.handle( client, "next" );
-            },
-            "next": function(client) {
-              process.nextTick(function(){
-                    cliFlow.transition( client, "listen" );
-              });
-            },
-            _onExit: function(client) {
-              
-            }
-        },
-
-        listen: {
-            "loop": function(client) {
-                 this.emit( "loop", { 
-				     status: 'Listening for incoming events' ,
-				     client : client ,
-				     process : process
-				 });
-            },
-            _onExit: function(client) {
-              
-            }
-        },
-
-       waiting: {
-            _onEnter: function(client) {
-                 this.handle( client, "idle" );
-            },
-			
-             "idle": function(client) {
-                 console.log("idle");
-             },
-            _onExit: function(client) {
-              
-            }
-									  
-	 },
-	 
-
-       booting: {
-            _onEnter: function(client) {
-                this.handle( client, "invoke" );
-    
-                this.emit( "booting", { status: 'booting' , client : client} );
-            },
-            invoke:  function(client) {
-                 this.transition( client, "listen" );
-            },
-            _onExit: function(client) {
-             
-            }
-									  
-	 },
-	 
-       testing: {
-            _onEnter: function(client) {
-                this.timer = setTimeout( function() {
-                    this.handle( client, "timeout" );
-                }.bind( this ), 30000 );
-                this.emit( "tests", { status: 'Testing' , client : client} );
-            },
-            timeout: "waiting",
-            _onExit: function() {
-                clearTimeout( this.timer );
-            }
-        }
-		
-	 },
-     invoke : function(client){
-             this.transition( client, "booting" ); 
-			 this.deferUntilTransition( client, 'listen' );
-	        return this;
-     },
-     read : function(client){
-             this.transition( client, "read" ); 
-	        return this;
-     }
- });
-	
-	
-cliFlow.on("transition", function (data){
-    console.log("we just transitioned from " + data.fromState + " to " + data.toState);
-});
-
-// Or, maybe I want to know when ANY event occurs
-cliFlow.on("*", function (eventName, data){
-    console.log("this thing happened:", eventName);
-   //  console.log(data);
-});
-
-cliFlow.on("tests", function (eventName, data){
-    console.log("tests happened:", eventName);
-    // console.log(data);
-});	
-   //  cliFlow. invoke(program);
-	// console.log("cliFlow", cliFlow);
-	
-*/
 
 
 program.on('option:verbose', function () {
@@ -346,19 +104,19 @@ program.on('option:verbose', function () {
 });
 
 program.on('option:*', function () {
-    // console[(process.env.VERBOSE ? 'error' : 'warn')]('Unknown option: %s\nSee --help for a list of available option.', program.args.join(' '));
+   
   if(process.env.VERBOSE){
-    // process.exit(1);
+  
   }
 });
 
 
 
-// error on unknown commands
+
 program.on('command:*', function () {
-   //console[(process.env.VERBOSE ? 'error' : 'warn')]('Invalid command: %s\nSee --help for a list of available commands.', program.args.join(' '));
+  
   if(process.env.VERBOSE){
-   //  process.exit(1);
+  
   }
 });
 
@@ -374,51 +132,95 @@ program.on('--help', function(){
  program.addImplicitHelpCommand();	
 	
 
-//program.outputHelp(function(help) {
-//	console.log(help);
-//	return help;
-//});
-   
- return F;	
+
+	
+  
+
+	
+(function(exports){	
+  var instance;
+ 
+	  require('@frdl/webfan').setup('workspace', {}, exports, program.version());   
+
+ 	Object.defineProperty(exports, 'Frdlweb', {
+		           get : function(){
+					  return Frdlweb;	               															  
+				   }
+	});		
+	
+ 	Object.defineProperty(exports.Frdlweb, 'instance', {
+		           get : function(){
+					  return instance;	               															  
+				   },
+		           set : function(i){
+					  instance = i;	               															  
+				   }
+	});		
+	
+	
+ 	Object.defineProperty(exports, 'instance', {
+		           get : function(){
+					  return instance;	               															  
+				   },
+		           set : function(i){
+					  instance = i;	               															  
+				   }
+	});			
+	
+	
+}(exports));	
+	
+	
+	
+  exports.F(null);
+
  
  function F(argv, stdout){
-    var instance = new Frdlweb( process.cwd() );    
-   
-	
-	
-	if('string'===typeof argv){
-	   argv = tokenize(argv);	
-	}
+ 
+	 new Frdlweb( process.cwd() ); 
 	 
-   instance.argv = argv;
+    exports.instance.argv = ('string'===typeof argv) ? tokenize(argv) : argv || process.argv ;
 
    var res = co(function*(){
-   
-       var configs = Promise.all([instance.readPackageFile(), instance.readConfigFile()])
+     
+	   
+     yield Promise.all([exports.instance.readPackageFile()])
 			.then(function(cnfs){		
-	                // var i = cliFlow.invoke(instance);
-					 configs = cnfs; 
+				
             }).catch(function(e){
 			        console.warn('e', e);
+		            errors.push(e);
 			});
-	   yield configs;
+
+     yield Promise.all([exports.instance.readConfigFile()])
+			.then(function(cnfs){		
+					
+            }).catch(function(e){
+			        console.warn('e', e);
+		            errors.push(e);
+			});	   
+
+
 	   
-
-        
-	  //   console.log('configs', typeof configs);
-
-
-         //  cliFlow.read(instance);
-	       program.parse(instance.argv); 
+	      
 		   
 		   
-        return errors;/* new Promise(function(yes,no){
-                          yes(true);
-                       });*/
-   }).then(function(errors){
+        return errors;
+   }).then(function(errors){    
+
+		 try{       
+			if(Array.isArray(argv) || 'string'===typeof argv){
+				program.parse(exports.instance.argv); 	
+			}
+		 }catch(e){       					
+			 console.warn('e', e);		    		
+			 errors.push(e);	
+		 }
+
      if(0===errors.length){
          return '';
      }else{
+		 console.log('errors', errors.join('\n'));
          return errors.join('\n');
       }
    });
@@ -431,7 +233,10 @@ program.on('--help', function(){
  function Frdlweb(dir){
 	this.pkg = false; 
 	this.cnf = false; 
-	this.projectDirectory(dir);
+	this.projectDirectory(dir);	 
+	this.argv = process.argv;
+	
+     exports.instance = this;
  }
 
 
@@ -448,7 +253,7 @@ function filter_boolean(value) {
 		  return true;			 
 		}
 					 
-	//  if(value.length != 1) throw "Filter mismatch.";
+
 	  return true === value;
 }
 
@@ -457,7 +262,7 @@ function filter_boolean(value) {
 function preg_quote (str, delimiter) {
 
 
-    // Quote regular expression characters plus an optional character  
+    /*!  Quote regular expression characters plus an optional character  
     // 
     // version: 1107.2516
     // discuss at: http://phpjs.org/functions/preg_quote
@@ -472,9 +277,9 @@ function preg_quote (str, delimiter) {
     // *     returns 2: '\*RRRING\* Hello\?'
     // *     example 3: preg_quote("\\.+*?[^]$(){}=!<>|:");
     // *     returns 3: '\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:'
-    
+    */
     return (str + '').replace(new RegExp('[.\\\\+*?\\[\\^\\]$(){}=!<>|:\\' + (delimiter || '') + '-]', 'g'), '\\$&')
-               //     .replace(/(\s)/, "\s")
+            
 ;
 }
 
@@ -505,13 +310,7 @@ function resolveEXModulesLocation() {
        }
    }
 			
-			/*
-   if(!paths || paths.length === 0 || (paths.length === 1 && !allowOnePath) ) {
-       console.log('NODE_PATH is either empty or contain only one entry which is the global node modules location. ' +
-           'If you like to use that entry specify --allowOnePath in the script arguments');
-       return './';
-   }
-*/
+		
    return paths[0];
 }
 	

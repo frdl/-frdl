@@ -1,107 +1,221 @@
 'use strict';
 
+ if ('undefined' === typeof ((window || self).global)) {
+	 try{
+       ((new Function("return self || this"))())['global'] = (new Function("return self || this"))();
+	 }catch(e){
+		  (window || self).global = (new Function("return self || this"))();
+	 }
+  }
 
-window.name = 'NG_DEFER_BOOTSTRAP!' +  window.name;	
+ if ('undefined' === typeof document || 'undefined' === typeof window) {
+    require("@frdl/node-browser-shim")((new Function("return self || this"))());
+ }
+
+  
+const NG_ENABLE_DEBUG_INFO = /^NG_ENABLE_DEBUG_INFO!/;
+const NG_DEFER_BOOTSTRAP = /^NG_DEFER_BOOTSTRAP!/;
+
+
+var deferBootstrapWindowName = function(clear){
+	if('undefined'!==typeof global.intent || 'undefined'===typeof window){
+		return;
+	}
+	var winName = window.name;
+    window.name= ('undefined'!==typeof clear && true === clear)
+	                 ? winName.replace(NG_DEFER_BOOTSTRAP, '')
+		             : 'NG_DEFER_BOOTSTRAP!'+winName.replace(NG_DEFER_BOOTSTRAP, '')
+	;
+};
+
+deferBootstrapWindowName();
+
+process = global.process = require('@frdl/process');
+
+//document.querySelector('html').setAttribute('ng-csp', 'no-inline-style;no-unsafe-eval');  
+//document.querySelector('html').setAttribute('ng-non-bindable', 'non-bindable');
+
 
 var MAX_DEPRECATION_WARNINGS = 1;
 var Webfan = require('@frdl/webfan');	
 const MAIN = Webfan.hps.scriptengine.webpack.main;
 var main = exports = module.exports =  Webfan.setup(MAIN, {}, {}/* global */, Webfan.hps.scriptengine.frdlweb.version);
-
-var frdl
-//= global.frdl
-= require('@frdl/functions');	
- //= Webfan.setup("frdl" , require('@frdl/functions'),{}/* global */, Webfan.hps.scriptengine.frdlweb.version);
+var is = require('@betafcc/is');  
 
 
 
-/*
-	Object.defineProperty(global, 'frdl', {
-		           get : function(){
-					  console.warn('global.frdl will maybe deprecated later..., require(\'frdl\') or require(\'main\').frdl instead!');   
-					 return frdl;	                                    
-				   }
-	});
-*/
+var frdl = require('@frdl/functions');
 
 
 
 
-Webfan .hps.scriptengine.webpack.chunkname= __webpack_chunkname__;	
-Webfan .hps.scriptengine.webpack.hash = __webpack_hash__;
+
+
+Webfan.hps.scriptengine.webpack.chunkname= __webpack_chunkname__;	
+Webfan.hps.scriptengine.webpack.hash = __webpack_hash__;
 //require.__webpack_require__.p || Webfan .hps.scriptengine.webpack.__PUBLIC_PATH__
 var __CONFIG_MAIN_NEXT_BUNDLE_FILENAME__ = Webfan .hps.scriptengine.webpack.__PUBLIC_PATH__ + Webfan.hps.scriptengine.webpack.__CONFIG_MAIN_NEXT_BUNDLE_FILENAME__;
 const configEvent = 'after.'+__CONFIG_MAIN_NEXT_BUNDLE_FILENAME__;
 
+const ev_ready_requirejs = 'ready:requirejs';
+const ev_ready_main = 'ready:main';
+const ev_ready_jquery = 'ready:jquery';
+const ev_ready_jquery_lazy = 'ready:jquery-lazy';
+const ev_ready_idle = 'ready:idle';
+const ev_ready_buffer = 'ready:buffer';
+const ev_ready_inline_worker = 'ready:inline-worker';
+const ev_ready_frdl_helper = 'ready:frdl:helper';
+const ev_defined_jquery = 'defined:jquery';
+const ev_ready_dom_query_old = 'ready:dom-query-old';
+const ev_ready_angularjs_root = 'ready:angularjs:root';
+const ev_ready_fs = 'ready:fs';
 
-global.process =  require('@frdl/process');
+
+const ev_ready_deps = 'frdl.ready.deps';
+//'frdl.ready.deps'
+
+
+
+
 
 		
 
 
 process.addReadyCheck(function(){
-	return 'undefined' !== typeof global.require;
+	return 'undefined' !== typeof global.require && 'undefined' !== typeof global.require.main;
 });
 
 
+process.once(ev_ready_requirejs, function(s){	
 
+	if('undefined'!==typeof global.require.main){	
+        console.warn('require.main is already set (try to overwrite module `' + MAIN	+ '` as `require.main`)');	
+	}
 
+	global.require.main = ('undefined' === typeof global.require.main) 
+		 ? main
+	     : frdl.extend( global.require.main, main);	
+});							
+			
 
-
-
-
-
-
-
-
- //require('@frdl/requirejs');
 /*
-  import('@frdl/requirejs')
-	  .then(function(){
-         process.emit('ready:requirejs');
-  });	
+process.required([
+	               ev_ready_requirejs,
+	               configEvent,
+				 ], function(){	
+	 var states = Array.prototype.slice.call(arguments);
+	     global.require.s.contexts._.defined['frdl'] =('undefined' === typeof global.frdl) 
+	                                                    ? global.require.main.frdl
+	                                                    : global.frdl;
+},  frdl.ready);
 */
-//frdl.browser = global.requirejs.isBrowser;
-//frdl.worker = ('undefined' !== typeof self && 'function' === typeof self.importScripts) ? true : false;
 
+
+
+function start(process, main, global){
+	
+(function(loadJQUery, loadRequireJs){
+	
+	
+  loadRequireJs();	
+	
+ if('undefined'!==typeof global.jQuery && 'undefined'!==typeof global.$ && global.$ === global.jQuery){
+   process.emit(ev_ready_jquery);
+ }else{
+   loadJQUery();
+ }
+
+
+}(function(){
+        import('jquery')
+	       .then(function(jquery){
+	           global.jQuery = global.$  = jquery.default;
+	           process.emit(ev_ready_jquery);
+       });		
+},
+ function(){
+  import('patch-require')
+	  .then(function(patch){
+          patch.default(main, main.frdl, global);
+	      process.emit(ev_ready_requirejs);
+  });	
+}));
+
+	
+}//function start()
+
+
+
+
+
+
+(function(){
+var oLog = console.log;
+	
+var d = function(m){
+	var c = m || sessionStorage.getItem('frdl.debug.mode');
+	try{
+		 if(!isNaN(c)){
+			return c; 
+		 }
+		
+         return parseInt(c);
+	}catch(e){
+			try{        
+				return JSON.parse(c);	
+			}catch(e){	
+				return c;	
+			}
+	}
+};
 
 frdl.debug = {
    mode : function(m){
          if('undefined'!==typeof m){
            process.env.DEBUG =m;
          }
+	   
+		 if(isNaN(process.env.DEBUG)){
+			process.env.DEBUG = d(process.env.DEBUG); 
+		 }	   
+	   
+	    if(process.env.DEBUG <=0){
+			 console.log=function(){};	
+		}else{
+		     console.log=oLog;		
+		}
+	   
         return process.env.DEBUG;
   },
-  default :	((sessionStorage && sessionStorage.getItem('frdl.debug.mode') ) 
-		 ? sessionStorage.getItem('frdl.debug.mode')
-		 : 'EXPERIMENTAL' === Webfan.hps.context.STAGE)
+  default :	(sessionStorage && d() ) 
+		      ? d()
+		      : 'EXPERIMENTAL' === Webfan.hps.context.STAGE || /iphone/i.test(navigator.userAgent)
+			
  };		
 
+/*	
  if(!frdl.debug.default){
     console.log=function(){};		 
+ }else{
+	 frdl.debug.mode(frdl.debug.default);
  }
-
+*/
+ frdl.debug.mode(frdl.debug.default);
 
 
 frdl.time= function(){
 	return (new Date()).getTime();
 };
-
+}());
 
 
 
 	
 
 
-//process.once('ready:requirejs', function(){	
-//  require('patch-require')(main, frdl, global);
-//});
+
 (function(){
-	Object.defineProperty(main, 'frdl', {
-		           get : function(){
-					  return frdl;	               															  
-				   }
-	});		
+var i;
 	
 	Object.defineProperty(frdl, 'ready', {
 		           get : function(){
@@ -114,6 +228,55 @@ frdl.time= function(){
 					  return  process.addReadyCheck;																	  
 				   }
 	});	
+
+	Object.defineProperty(frdl, 'guid', {
+		           get : function(){
+					            i++;
+					 			 var t = frdl.explode('.', frdl.microtime() .toString() );				   
+		                    	 var id =  frdl.dechex( parseInt(t[0]) )
+							    +'-'
+						        +   frdl.dechex( parseInt(t[1]) )	   
+							   +'-'   
+							   + frdl.dechex( frdl.mt_rand() )
+						       + '-'
+						       + i.toString() 
+					  ;				   
+			             return frdl.str_replace('.', '-', id);																  
+				   }
+	});	
+	
+	
+	
+
+	
+	Object.defineProperty(frdl, 'is', {
+		           get : function(){
+					  return is;																  
+				   }
+	});	
+	
+ 
+	
+
+
+	Object.defineProperty(frdl, 'slice', {
+		           get : function(){
+					  return require('sliced');																  
+				   }
+	});
+
+  
+
+	Object.defineProperty(frdl, 'context', {
+		           get : function(){
+					  return require('async-context');															  
+				   }
+	});   		
+	
+
+
+ 
+require('@frdl/sort');
 }());
 
 
@@ -121,6 +284,7 @@ frdl.time= function(){
 
 (function(){
  var i = 0;	
+	/*
 	Object.defineProperty(global, 'Webfan', {
 		           get : function(){
 					   if(i<MAX_DEPRECATION_WARNINGS){
@@ -131,13 +295,20 @@ frdl.time= function(){
 				   }
 	});
 
-
+*/
 
 	Object.defineProperty(main, 'Webfan', {
 		           get : function(){
 					  return Webfan;																	  
 				   }
 	});
+	
+	Object.defineProperty(main, 'frdl', {
+		           get : function(){
+					  return frdl;	               															  
+				   }
+	});			
+	
 }());
 
 
@@ -160,11 +331,11 @@ frdl.time= function(){
 
 	
 frdl.ready.readyMain = process.required([
-	'ready:requirejs',
-	configEvent
+	ev_ready_requirejs,
+	configEvent,
 ], function(){
 	 var states = Array.prototype.slice.call(arguments);
-	process.emit('ready:main', states);
+	process.emit(ev_ready_main, states);
 	
 },  frdl.ready/*, false*/);		
 
@@ -173,18 +344,21 @@ frdl.ready.readyMain = process.required([
 
 
 frdl.ready.deps = process.required([	
-	                                   'ready:requirejs',
+	                                   ev_ready_requirejs,
 	                                    configEvent,
-									    'ready:main', 
-										'ready:jquery',
-										'ready:idle',
-									    'ready:requirejs',
-									    'ready:buffer',
-									    'ready:inline-worker',
-									    'ready:frdl:helper'
+									    ev_ready_main, 
+										ev_ready_jquery,
+										ev_ready_idle,
+									    ev_ready_buffer,
+									    ev_ready_inline_worker,
+									    ev_ready_frdl_helper,
+	                                    ev_ready_jquery_lazy,
+	                                    'registerComponent::before',
+	                                    'registerComponent::after',
 										], function(){	
 	 var states = Array.prototype.slice.call(arguments);
-	process.emit('frdl.ready.deps', states);
+  
+	process.emit(ev_ready_deps, states);
 	
 	
 },  frdl.ready, false);							
@@ -193,7 +367,73 @@ frdl.ready.deps = process.required([
 
 
 
+
+
+
+process.required([
+	configEvent,
+	ev_ready_main,
+	ev_ready_requirejs,
+	ev_defined_jquery,
+
+], function(){
+	 var states = Array.prototype.slice.call(arguments);
+	
+	global.require(['webfan/jquery-addons'], function($){	  
+         $.lazy.loadMap( Webfan.hps.scriptengine['lazy-jquery'] );	
+		 process.emit(ev_ready_jquery_lazy, states);
+    });	 
+	
+	
+	
+},  frdl.ready/*, false*/);		
+
+
+
+
+
+
+
+
    
+process.required([
+	                                 configEvent,
+	                                 ev_ready_main,
+	                                   ev_ready_jquery,
+										], function(){	
+	 var states = Array.prototype.slice.call(arguments);
+  
+	     global.require.s.contexts._.defined['jquery'] = global.jQuery;
+         global.require.s.contexts._.defined['webfan/frdl-jQuery'] =  global.require.s.contexts._.defined['jQuery'] = global.require.s.contexts._.defined['jquery'];  	 
+         process.emit(ev_defined_jquery, global.require.s.contexts._.defined['jquery']);	
+ 
+
+},  frdl.ready/*, false*/);
+
+
+
+
+
+
+
+
+
+process.required([	
+	                                 configEvent,
+	                                ev_ready_main,
+	                                   ev_ready_jquery,
+	                                   ev_defined_jquery,
+	                                    
+										], function(){	
+	 var states = Array.prototype.slice.call(arguments);
+  
+	global.require(['idle'], function(idle){	  
+	    global.jQuery.fn.idle = global.$.fn.idle = idle;			
+	    process.emit(ev_ready_idle, global.jQuery.fn.idle);	
+    });	 
+
+},  frdl.ready/*, false*/);
+
 
 
 
@@ -209,10 +449,40 @@ frdl.ready.deps = process.required([
 
 
 
-//process.once('ready:main', function(s){	
-// console.log('frdl '+ Webfan.hps.scriptengine.frdlweb.version);	
-//});							
-						
+
+
+process.required([	
+	                               configEvent,
+	                                 ev_ready_main,
+	                                   ev_ready_jquery,
+	                                   ev_defined_jquery,
+	                               //   ev_ready_idle, 
+										], function(){	
+	 var states = Array.prototype.slice.call(arguments);
+
+ global.require(['frdl-dom-query-old'], function(dom){
+   
+   Object.defineProperty(frdl, '$j', {
+ 	 get : function(){
+	 	return dom.$j;
+	 }
+			
+   });
+    
+   Object.defineProperty(frdl, 'Dom', {
+ 	 get : function(){
+	 	return dom.Dom;
+	 }
+			
+   });
+   
+   process.emit(ev_ready_dom_query_old, dom);
+
+ }); 
+},  frdl.ready/*, false*/);
+
+
+			
 
 
 
@@ -240,18 +510,91 @@ frdl.ready.deps = process.required([
  var i = 0;	
 	Object.defineProperty(frdl, 'fs', {
 		           get : function(){
-					  if(i<MAX_DEPRECATION_WARNINGS) {
-						  console.warn('frdl.fs will maybe deprecated later...,use require(\'@frdl/fs\') or require(\'fs\')  instead!');
-					   i++;
-					  }
+					 // if(i<MAX_DEPRECATION_WARNINGS) {
+					//	  console.warn('frdl.fs will maybe deprecated later...,use require(\'@frdl/fs\') or require(\'fs\')  instead!');
+					//   i++;
+					//  }
 					  return require('@frdl/fs');															  
 				   }
 	});
 	
 	
 	 process.once(configEvent, function(Webfan){	 
-	     global.require.s.contexts._.defined['filer'] = require('filer.js');	
-	     global.require.s.contexts._.defined['fs'] = require('@frdl/fs');	 
+	       global.require.s.contexts._.defined['filer'] = require('filer.js');	
+	   //  global.require.s.contexts._.defined['fs'] = require('@frdl/fs');	
+		 if('undefined'===typeof global.require.s.contexts._.defined.fs){
+		   Object.defineProperty(global.require.s.contexts._.defined, 'fs', {
+		           get : function(){
+					  return frdl.fs;															  
+				   }
+	        });	 
+			 
+		 }else{
+			global.require.s.contexts._.defined.fs = frdl.fs; 
+		 }
+		 
+		 
+		 if('undefined'===typeof global.require.s.contexts._.defined['@frdl/fs']){
+			 
+		   Object.defineProperty(global.require.s.contexts._.defined, '@frdl/fs', {
+		           get : function(){
+					  return frdl.fs;															  
+				   }
+	        });	 
+			 
+		 }else{
+			global.require.s.contexts._.defined['@frdl/fs'] = global.require.s.contexts._.defined.fs; 
+		 }
+		   process.emit(ev_ready_fs, true);	
+		 
+		 
+		 
+		 
+		 
+		 
+		 if('undefined'===typeof global.require.s.contexts._.defined['@frdl/webfan']){
+			 
+		   Object.defineProperty(global.require.s.contexts._.defined, '@frdl/webfan', {
+		           get : function(){
+					  return Webfan;															  
+				   }
+	        });	 
+			 
+		 }else{
+		//	global.require.s.contexts._.defined['@frdl/webfan'] = Webfan; 
+		 }
+		 
+		 
+		 
+		 
+		 if('undefined'===typeof global.require.s.contexts._.defined['@frdl/eventemitter']){
+			 
+		   Object.defineProperty(global.require.s.contexts._.defined, '@frdl/eventemitter', {
+		           get : function(){
+					  return require('@frdl/eventemitter');															  
+				   }
+	        });	 
+			 
+		 }else{
+			global.require.s.contexts._.defined['@frdl/eventemitter'] = require('@frdl/eventemitter'); 
+		 }
+		 
+		 
+		 if('undefined'===typeof global.require.s.contexts._.defined['@frdl/functions']){
+			 
+		   Object.defineProperty(global.require.s.contexts._.defined, '@frdl/functions', {
+		           get : function(){
+					  return frdl;															  
+				   }
+	        });	 
+			 
+		 }else{
+			global.require.s.contexts._.defined['@frdl/functions'] = frdl; 
+		 }
+		 
+		 
+		 
+		 
 	 });
 }());	 
 
@@ -271,19 +614,18 @@ frdl.ready.deps = process.required([
 }());
 
 
-
-
-
-/*
+(function(){
 	Object.defineProperty(frdl, 'watchFor', {
 		           get : function(){
-					//  return require('insertion-query');		
-					   return require('watchFor');
+					  return require('watchFor');															  
 				   }
 	});
-    
-*/
-frdl.watchFor = require('watchFor');
+}());
+
+
+
+
+
 
 
 
@@ -295,34 +637,61 @@ frdl.watchFor = require('watchFor');
 
 	Object.defineProperty(frdl, 'bootAngularJs', {
 		           get : function(){
-					  return  function($element, modules, config){
+					  return  function($element, modules, config, clear){
 						 var o=0, r;
 					     return frdl.co(function*($element, modules, config){	
 						   yield new Promise(function(resolve, reject){	 
 					          global.require(['angular-frdl'], function(angular){  
-	                          //    angular.element(document).ready(function () { 	
+	                              angular.element(document).ready(function () { 	
 	                               
 						    	      angular.element(function() {
-									//	 window.name=window.name.replace(/NG_DEFER_BOOTSTRAP\!/, ''); 
-	                                     r = angular.bootstrap($element, modules, config);
-										 								 
-										  while('undefined'===typeof r && o<8){
+										 
+										 if(clear && !!clear){ 
+										    $($element).data('$injector', ""); 
+										 }
+										  
+                                            deferBootstrapWindowName(true);
+										  
+		  
+										  try{  
+	                                        r = angular.bootstrap($element, modules, config);
+									     }catch(e){
+												 // reject('Cannot AngularJs Bootstrap ' + modules.join(','));
+												 // return;
+										 	  }
+										  
+										  var stopper = 16;
+										  while('undefined'===typeof r && o<stopper 
+												&& !$element.hasAttribute('ng-scope')
+												&& ('undefined'===typeof $element.injector || !$element.injector())
+											   ){
 											o++;
 											  try{
-												  r = angular.bootstrap($element, modules, config);
-												  resolve(r);
+												  r = angular.bootstrap($element, modules, config);		
+												//  resolve(r);
+												//  return;
 											  }catch(e){
-												  reject('Cannot AngularJs Bootstrap ' + modules.join(','));
+												 //reject('Cannot AngularJs Bootstrap ' + modules.join(','));
+												  console.warn('Cannot AngularJs Bootstrap ' + modules.join(',') + '\n' + e);
 												  break;
 											  }
-										  }  
-	                                    // window.name='NG_DEFER_BOOTSTRAP!'+window.name;
+										  } 
+										  
+										  resolve(r);
+	                                    
 										
 	                                  });  
-						       //   });  
+						          });  
 						   
 						       });  
-					      	 });	 
+					      	 }).then(function(res){							  										
+			
+							       process.nextTick(function(){													
+								       main.app.removeCloak();												
+							       });	
+		   
+							     return res;
+						      });	 
 						     
 						      return r;
 						  }, $element, modules, config);
@@ -330,38 +699,32 @@ frdl.watchFor = require('watchFor');
 				   }
 	});
 
-/*
-	Object.defineProperty(frdl, 'bootAngularJs', {
-		           get : function(){
-					  return  function($element, modules, config){
-						 var o=0, r;
-					
-						    	      require('angular-frdl').element(function() {
-									//	 window.name=window.name.replace(/NG_DEFER_BOOTSTRAP\!/, ''); 
-	                                   //  r = angular.bootstrap($element, modules, config);
-										 								 
-										  while('undefined'===typeof r && o<8){
-											o++;
-											  try{
-												  r = angular.bootstrap($element, modules, config);
-												
-											  }catch(e){
-												//    reject('Cannot AngularJs Bootstrap ' + modules.join(','));
-												  break;
-											  }
-										  }  
-	                                    // window.name='NG_DEFER_BOOTSTRAP!'+window.name;
-										
-	                                  });  
-						   
-					      return r;
-					  };															  
-				   }
-	});
-
-*/
 
 
+
+
+
+ process.once(configEvent, function(Webfan){  	
+	 if('undefined' === typeof Webfan.hps.scriptengine.angularjs.rootSelector){				
+		 Webfan.hps.scriptengine.angularjs.rootSelector = 'body';  			
+	 }
+ });	
+
+
+
+(function(main){
+  process.once('registerComponent::after', function(){	
+     if(null === document.querySelector('[ng-flows], [ng-flow], [ng-app], app-root') ){
+		process.ready(function(){ 
+			process.nextTick(function(){
+				process.ready(function(){ 
+		              main.app.boot(Webfan.hps.scriptengine.angularjs.rootSelector);
+				});
+			});
+		});
+	 }
+  }); 
+}(main));
 
 
 
@@ -370,42 +733,67 @@ frdl.watchFor = require('watchFor');
 	'use strict';
 	
 var Instances = {};	
-frdl.registerComponent=registerComponent;
+main.frdl.registerComponent=registerComponent;
 	
 //frdl.debug.default=true;
 	
 
 	
 process.required([	
-	                                   'ready:requirejs',
-	                                    configEvent,
-									    'ready:frdl:helper'
+	                                  ev_ready_main,
+									    ev_ready_frdl_helper,
+	                                   ev_ready_angularjs_root,
+	                                    ev_ready_jquery,
+	                                    ev_defined_jquery, 
+	                                       ev_ready_dom_query_old,
 										], function(){	
 	 var states = Array.prototype.slice.call(arguments);
 	
-  global
-	  .require(Webfan.hps.scriptengine.webpack.main)
-	  .frdl
-	  .each(Webfan.hps.scriptengine.frdlweb.components, registerComponent);
- },  frdl.ready, false);
+//process.ready(function(){	
+  process.emit('registerComponent::before', Instances);			
+    main.frdl.each(main.Webfan.hps.scriptengine.frdlweb.components, registerComponent);
+  process.emit('registerComponent::after', Instances);	
+  	
+//});	
+	
+	
+	
+ },  main.frdl.ready, false);
 	
 	
 
 	
-	
+
 
 function registerComponent($i, component){	
-	 if(!!frdl.debug.default){	 
+	
+	if(null===$i || 'undefined'===typeof $i){
+	   $i = Object.keys(Instances).length;	
+	}
+	
+	 if(!!main.frdl.debug.default){	 
 		 console.log('Register component: ', component);
 	 }
-	 global.require(Webfan.hps.scriptengine.webpack.main).frdl.watchFor(component.selector)
+	 main.frdl.watchFor(component.selector)
         .every(function(element){
-		     
+		  
+		/*    				
+		 var i = 0; 	 
+		 for(i=0;i<component.load.length;i++){
+			 (function(myI, i){
+			   var indexC = i;
+			   var indexI = myI;	 
+		       main.frdl.addReadyCheck(function(){
+				    return 'undefined'!==typeof  Instances[indexC][indexI];
+			   });
+			 }(i, $i));
+		 }
+		 */
 		      if('undefined'===typeof Instances[$i]){
 				 Instances[$i] = {component:component,element:element};  
 			  }
-		     if(!!frdl.debug.default) console.log('Invoke component: ', {component:component,element:element});
-		       frdl.co(function*($i, component, element){
+		     if(!!main.frdl.debug.default) console.log('Invoke component: ', {component:component,element:element});
+		       main.frdl.co(function*($i, component, element){
 				  var i = 0; 
 				  for(i=0;i<component.load.length;i++){
 					  var load = component.load[i];
@@ -422,13 +810,15 @@ function registerComponent($i, component){
 							};
 						 } 	
 						     switch(load.type){
-								 case 'html-url' :
-									     frdlweb. frdl.dl(load.load, {	
+						    	 case 'html-url' :
+								 case 'append-url' :	 
+								 case 'prepend-url' :	 
+									 main.frdl.dl(main.frdl.templater(load.load, main), {	
 											 callback : function (e, r) {           
 												 if(e){
 													 reject(e);
                                                  }else{		
-													 $(element).html(r.data || r);
+													 global.require('jquery')(element)[load.type.split(/\-/)[0]](r.data || r);
 													 resolve([]);			
 												 } 	
 											 },	
@@ -436,65 +826,37 @@ function registerComponent($i, component){
 	 
 											 } 	
 										 });
-									 break;		
-								 case 'append-url' :
-									     frdlweb. frdl.dl(load.load, {	
-											 callback : function (e, r) {           
-												 if(e){
-													 reject(e);
-                                                 }else{		
-													 $(element).append(r.data || r);
-													 resolve([]);			
-												 } 	
-											 },	
-											 always : function(){	
-	 
-											 } 	
-										 });
-									 break;		
-								 case 'prepend-url' :
-									     frdlweb. frdl.dl(load.load, {	
-											 callback : function (e, r) {           
-												 if(e){
-													 reject(e);
-                                                 }else{		
-													 $(element).prepend(r.data || r);
-													 resolve([]);			
-												 } 	
-											 },	
-											 always : function(){	
-	 
-											 } 	
-										 });
-									 break;		
+									 break;	
 								 case 'html' :
-									   $(element).html(load.load);
-									   resolve([]);
-									 break;			
 								 case 'append' :
-									   $(element).append(load.load);
+								 case 'prepend' :										 
+									   global.require('jquery')(element)[load.type](main.frdl.templater(load.load, main));
 									   resolve([]);
-									 break;			
-								 case 'prepend' :
-									   $(element).prepend(load.load);
-									   resolve([]);
-									 break;									 
+									 break;
 								 case 'bootstrap-angular-js' : 
 								 case 'ba' :
 								 case 'ba1' :
 									 var l = [];											
-									 
-									 frdl.each(load.load, function(x, m){
-										l.push(frdl.strpp(m, main)); 
-									 });
-									 
-						             frdl.bootAngularJs(element, l).then(function(r){
+															
+									 if('string'===typeof load.load){					
+										 load.load = [load.load]; 				
+									 } 
+									 main.frdl.each(load.load, function(x, m){
+										//if('string'===typeof m){
+											l.push(main.frdl.templater(m, main)); 
+											//l.push(m); 
+										//}
+									 }); 
+									
+						             main.frdl.bootAngularJs(element, l, {}, (load.clear && !!load.clear)).then(function(r){
 										  resolve(r);
 									 }).catch(function(e){
 										reject(e); 
 									 });
+									
 									 break;
 								 case 'amd' : 
+								 case 'amd-callback' : 
 				                     
 									 if('string'===typeof load.load){					
 										 load.load = [load.load]; 				
@@ -502,32 +864,163 @@ function registerComponent($i, component){
 				
 									
 									 var l = [];
-									 frdl.each(load.load, function(x, m){
-										l.push(frdl.strpp(m, main)); 
+									 main.frdl.each(load.load, function(x, m){
+										l.push(main.frdl.templater(m, main)); 
 									 });
 									 			
 									 global.require(l, function(){						
 										 var modules = Array.prototype.slice.call(arguments);					
 										 var Module = modules[modules.length-1];						
-										 if('function' === typeof Module){					
+										 if('amd-callback' === load.type && 'function' === typeof Module){					
 											 Module.apply(element, [element, main]);						
 										 }				
 										 resolve(modules);
-										  if(!!frdl.debug.default) console.log('Resolved component amd-modules: ', load.load);
+										  if(!!main.frdl.debug.default) console.log('Resolved component amd-modules: ', load.load);
 									 });									 
 								 break;
 									 
 								 case 'script' :
-									 frdl.getScript(frdl.strpp(load.load, main), function(element, main){
+									 main.frdl.getScript(main.frdl.templater(load.load, main), function(element, main){
 										 resolve([]);
-										 if(!!frdl.debug.default) console.log('Resolved component script: ', load.load);
-									 }, false, false, [element, main]);
+										 if(!!main.frdl.debug.default) console.log('Resolved component script: ', load.load);
+									 }, true, false, [element, main]);
 								  break;
+									 
+								 case 'css' :
+								 case 'style' :
+								 case 'styles' :
+								 case 'stylesheet' :
+								 case 'stylesheets' :
+								 case 'css-link' :
+								 case 'css-import' :
+												 
+									 if('string'===typeof load.load){					
+										 load.load = [load.load]; 				
+									 }
+													
+									 var l = [], scriptsEmitter = new (require('@frdl/eventemitter')); 
+								     var scriptsState = scriptsEmitter.required(['@url_rewrite', '@scripts_fired'], function(r){
+                                           resolve([]);
+                                     },  scriptsEmitter/*, false*/);	
+									 
+									 main.frdl.each(load.load, function(x, m){
+										   var url = main.frdl.templater(m, main);
+										   l.push(url); 
+										   scriptsState.add(url);  
+									 });								 
+									 scriptsEmitter.emit('@url_rewrite', l);
+														
+									 main.frdl.each(l, function(x, url){
+										    if('css-import' === load.type){
+												main.frdl.cssImportLink(url).then(function(r){
+													scriptsEmitter.emit(url, true);
+												});
+											}else{
+												main.frdl.getCSS(url, 
+																 ('undefined'===typeof load.once || !!load.once) 
+																 ? document.querySelector('head') 
+																 : element, 
+																 ('undefined'===typeof load.once || !!load.once));
+												scriptsEmitter.emit(url, true);
+											}
+									 });	
+									 scriptsEmitter.emit('@scripts_fired', l);
+									 
+									 
+									 
+								   break;
+									 
+
+								 case 'directive' : 
+								 case 'component' :
+									 
+									 				
+									 if('string'===typeof load.load){					
+										 load.load = [load.load]; 				
+									 }
+                                     
+										
+									 var l = ['angular-frdl'];
+									 main.frdl.each(load.load, function(x, m){
+										l.push(main.frdl.templater(m, main)); 
+									 });
+									 
+									 global.require(l, function(){						
+										 var modules = Array.prototype.slice.call(arguments);					
+										 var Module = modules[modules.length-1];	
+										 var Name = main.frdl.dashToCamel(component.selector);
+										 
+										 
+																			 
+										  //   main.app.removeCloak();
+										 
+										 
+										 
+		                                 var compile = function(scope){		
+											 /*   
+											  var $injector = modules[0].injector(['ng',// 'mockApp',
+																				   main.app.root.name]);	
+											   var $compile = $injector.get("$compile");
+											   $compile(element)(scope);  
+											   scope.$digest();
+											 */
+										 modules[0].element(document).ready(function(){
+											 
+											// modules[0].element(document.querySelector(Webfan.hps.scriptengine.angularjs.rootSelector))
+											
+											    //  .injector()
+											   // .injector(modules[0].modules)
+											//  .injector([])
+											 modules[0].element(document.querySelectorAll(main.Webfan.hps.scriptengine.angularjs.rootSelector))
+												.injector().invoke([ '$compile', function($compile) {
+                                          
+												     $(element).data('$injector', ""); 
+												     var e = document.createElement('div');
+												     e.innerHTML = element.innerHTML; 
+												 
+												     $compile(e)(scope);  
+												     $(element).html($(e).html());												     
+											    	 scope.$digest();
+													/*
+												     $compile(e)($rootScope);  
+												     $(element).html($(e).html());												     
+											    	 $rootScope.$digest();		
+												  */
+												 
+                                               }]);
+											 });//angular.element(document).ready
+										 };
+										 
+										 main.app.root[load.type].apply(null,[Name,Module]);  
+										 try{
+										//    var scope = modules[0].element(element.parentNode).scope();		
+											   var scope = modules[0].element(element).scope();		
+										 }catch(e){
+											 var scope = false;
+										 }
+
+	
+								            if(true === main.app.isBooted && scope){
+												 compile(scope);
+											     resolve(modules); 
+											}else{
+												 resolve(modules); 
+											}
+										 
+										 
+											
+										 
+										     if(!!main.frdl.debug.default) console.log('Resolved component '+load.type+': ', load.load);
+								
+									 });								 
+
+									 break;
+									 
 							 }
 						  
 						 
 					  }).then(function(loaded){
-			                   if(!!frdl.debug.default) console.log('Resolved component load definition [#'+(i + 1).toString()+']: ', loaded);
+			                   if(!!main.frdl.debug.default) console.log('Resolved component load definition [#'+(i + 1).toString()+']: ', loaded);
 						       Instances[$i][i]=loaded;
 			          });
 				  }
@@ -535,7 +1028,7 @@ function registerComponent($i, component){
 				   return Instances[$i];
 			  }, $i, component, element).then(function(Component){
 				//   require('@frdl/webfan').hps.scriptengine.frdlweb.components[$i]._modules = ComponentMerging;
-			       if(!!frdl.debug.default) console.log('Ready component: ', Component);
+			       if(!!main.frdl.debug.default) console.log('Ready component: ', Component);
 			   });
 		 
 		 
@@ -550,10 +1043,300 @@ function registerComponent($i, component){
 
 
 
+(function(main){
+	'use strict';
+	
+  var _isBooted = false;
+	
+	
+	Object.defineProperty(main, 'angular', {
+		           get : function(){
+					  return false;	                                    
+				   }	        
+	});
+	
+	
+	
+   process.required([
+      configEvent,
+      ev_ready_frdl_helper
+   ], function(){	
+	   
+ 									 main.frdl.each(Webfan.hps.scriptengine.angularjs.mainRequire, function(i, dependency){
+										 Webfan.hps.scriptengine.angularjs.mainRequire[i] = main.frdl.templater(dependency, main);
+									 });
+	   
+	   
+        global.require(Webfan.hps.scriptengine.angularjs.mainRequire, function(url, angular){
+			
+			//angular.bootstrap($element, modules, config);
+			 main.frdl.MagicHelper.addMethodCallback(angular, 'bootstrap', false, function($element, modules, config){
+				process.emit('angularjs:bootstrap', {
+					   element : $element,
+					   modules : modules,
+					   config : config
+				});
+			}, angular);
+			
+			
+	       var mockApp = angular._module('mockApp', []).provider({
+  
+	         	$rootElement:function() {    
+		          	this.$get = function() {
+                       return angular.element(document.querySelector('html'));  
+			        }; 
+	         	}
+
+	        });		
+			var $injector= angular.injector(['ng','mockApp']);
+            var $location = $injector.get("$location");
+			
+			
+			
+						   
+						   
+						   
+angular.module('oc.lazyLoad')
+ .config([ '$ocLazyLoadProvider',
+  function(  $ocLazyLoadProvider) {	  
+	  								 
+									 main.frdl.each(Webfan.hps.scriptengine.lazy, function(x, m){
+										 main.frdl.each(Webfan.hps.scriptengine.lazy[x].files, function(i, f){											 
+											  Webfan.hps.scriptengine.lazy[x].files[i] = main.frdl.templater(f, main);
+										 });
+									 });
+	  
+
+     $ocLazyLoadProvider.config({
+        jsLoader: global.require,
+        debug: true,
+		events : true,            
+        serie: false,			
+        cache: true,
+        rerun: false,
+        reconfig: false ,                                            
+        modules: Webfan.hps.scriptengine.lazy
+    });	  
+
+}]);						   
+						   
+						   
+						   
+						   
+						   
+						   
+			main.module('app', function(plug, req){
+				
+				 									
+				                      main.frdl.each(Webfan.hps.scriptengine.angularjs.mainInject, function(i, dependency){
+										 Webfan.hps.scriptengine.angularjs.mainInject[i] = main.frdl.templater(dependency, main);
+									 });
+				
+				plug.extend({
+					 root : angular.module(MAIN, Webfan.hps.scriptengine.angularjs.mainInject),
+					 angular : false,
+					 removeCloak : function(){		
+					   process.ready(function(){
+					    setTimeout(function(){	 
+					     process.nextTick(function(){
+						     $('[ng-cloak], .ng-cloak')			
+					          .removeAttr('ng-cloak')		
+					          .removeClass('ng-cloak')	
+				    	    ;		
+						 });
+						},2500);
+					   });		 
+				     }
+				});
+			});
+			
+		       
+			  Object.defineProperty(main.app, 'angularjs', {
+		           get : function(){
+					  return angular;	                                    
+				   }
+	          });
+					
+			
+			
+			 Object.defineProperty(main.app, 'isBooted', {
+		           get : function(){
+					  return _isBooted;	                                    
+				   }
+	          });		
+			
+			main.module('app', function(plug, req){
+				plug.extend({
+					  boot : function(selector){
+					      if(!!_isBooted){
+							  return;
+						  }
+						  _isBooted = true;
+						  global.require(global.require('@frdl/webfan').hps.scriptengine.webpack.main).frdl.registerComponent(null, {			
+							  selector : selector,			
+							  load :[ 			
+								  {				    
+									  type : 'bootstrap-angular-js',				
+									  load :	[plug.root.name]			
+								  }		
+							  ]	
+						  });	  
+						  
+					  }
+					
+					
+				});
+			});		
+			
+			
+	main.module('app', function(plug, req){			
+	
+		plug.root.filter('base64_decode', function() { 		
+			return function(x) {    
+              return main.frdl.base64_decode(x);       
+			};	
+		});
+		
+	
+		plug.root.filter('base64_encode', function() { 		
+			return function(x) {    
+              return main.frdl.base64_encode(x);       
+			};	
+		});
+		
+  		plug.root.filter('base64', function() { 		
+			return function(x) {    
+              return main.frdl.base64_encode(x);       
+			};	
+		});
+		
+	});
+
+   
+			
+			
+  main.module('app', function(plug, req){			
+	
+  plug.root.service('XFrdlRequestNegotiationInterceptor', ['$rootScope', '$injector', function($rootScope, $injector) {
+        var service = this;
+        service.request = function(config) {
+			
+                var state = $injector.get('$state') || plug.toState;
+
+		    	if(state && 'undefined' !== typeof state.data && 'undefined' !== typeof state.data.xFrdlGetView){
+					config.headers['X-Frdl-Request-Negotiation'] = state.data.xFrdlGetView;
+				}else if(state && state.current && 'undefined' !== typeof state.current.data && 'undefined' !== typeof state.current.data.xFrdlGetView){
+					config.headers['X-Frdl-Request-Negotiation'] = state.current.data.xFrdlGetView;
+				}else{								    
+					var u1 = url.parse(window.location.href);			
+					var u2 = url.parse(config.url);
+					if(u1.host===u2.host || null === u2.host){	
+					   config.headers['X-Frdl-Request-Negotiation'] = 'centerView';
+					}
+				}
+	
+			
+			
+            return config;
+        };
+	  
+	  
+	  
+        service.responseError = function(response) {
+            if (response.status !== 200 && response.status !== 201) {
+                $rootScope.$broadcast('HttpResponse:'+response.status.toString());
+            }
+            return response;
+        };
+	  
+	   return service;
+    }])  
+    .config(['$httpProvider', function($httpProvider) {
+        $httpProvider.interceptors.push('XFrdlRequestNegotiationInterceptor');
+    }])
+	
+	 .config(['$templateRequestProvider', function($templateRequestProvider) {    
+		  $templateRequestProvider.httpOptions({     
+			  headers: {
+				  'X-Frdl-Request-Negotiation' : 'centerView' 
+			  }   
+		  });
+	  }])
+	  
+	 .run( ['$rootScope', '$state', '$stateParams', function ($rootScope, $state, $stateParams) {
+              $rootScope.$state = $state;
+              $rootScope.$stateParams = $stateParams; 		   
+      }])
+		
+    .run(['$rootScope', '$location', '$state', '$stateParams', '$timeout', function ($rootScope, $location, $state, $stateParams, $timeout) {
+
+        $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams){ 
+           // alert("root change success");
+			          if(toState && 'undefined' !== typeof toState.data && 'undefined' !== typeof toState.data.meta){
+						  var meta = toState.data.meta;
+						   $timeout(function () {
+                                   if(meta.title){
+							         document.title = meta.title;
+						           }
+                                   if(meta.description){
+							         document.description = meta.description;
+						           }
+                           });
+						 
+					  }
+        });
+
+        $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams, options){ 
+          //  alert("root change start");
+			//console.log('toState', toState);
+			//console.log('options', options);
+			
+			plug.toState  = toState;
+        });
+
+        $rootScope.$on('$stateChangeError', function(event, toState, toParams, fromState, fromParams, error){ 
+          //  alert("root change error");
+			  global.require.main.frdl.alert.error(error);
+        });
+    }])		
+ ;
+	  
+ });
+	
+			
+  main.module('app', function(plug, req){	
+	  
+    plug.root.config(['$stateProvider', function($stateProvider) {
+       plug.$stateProvider = $stateProvider;
+/*
+		Object.defineProperty(plug, 'stateProvider', {
+		           get : function(){
+					  return $stateProvider;																  
+				   }
+		});		
+	*/	
+		 plug.addState = function(name, state) { 
+             $stateProvider.state(name, state);
+        };
+    }])		
+	.run( ['$rootScope', function ($rootScope) {
+		     plug.$rootScope = $rootScope;
+      }])
+	 ;
+	  
+  });
+			
+
+			
+			process.emit(ev_ready_angularjs_root, angular);				
+        });	   
+   },  main.frdl.ready, false);
+}(main));
 
 
 
 
+ process.once(configEvent, function(){	
 
 	Object.defineProperty(frdl, 'alert', {
 		           get : function(){
@@ -567,8 +1350,16 @@ function registerComponent($i, component){
 		           get : function(){
 					  return require('on-idle');															  
 				   }
-	});   
-
+	});  
+	 
+	 
+	Object.defineProperty(frdl, 'version_compare', {
+		           get : function(){
+					  return require('locutus/php/info/version_compare');																  
+				   }
+	});	 
+	 
+});
 
 
 
@@ -640,28 +1431,79 @@ function registerComponent($i, component){
 	});  
 
 
+	Object.defineProperty(main, 'downloader', {
+		           get : function(){
+					  return new Promise(function(resolve, reject){	  
+	                       import('@frdl/simple-downloader')	 						
+	                      	     .then(function(downloader){
+									 resolve(downloader.default);
+								 });						  
+					  });
+				   }
+	});  
 
 
 
+	Object.defineProperty(main, 'axios', {
+		           get : function(){
+					  return new Promise(function(resolve, reject){	  
+	                       import('axios')	 						
+	                      	     .then(function(axios){
+									 resolve(axios.default);
+								 });						  
+					  });
+				   }
+	});  
+
+
+	Object.defineProperty(main, 'jszip', {
+		           get : function(){
+					  return new Promise(function(resolve, reject){	  
+	                       import('jszip')	 						
+	                      	     .then(function(ZipArchive){
+									 resolve(ZipArchive.default);
+								 });						  
+					  });
+				   }
+	});  
+
+	Object.defineProperty(main, 'uglify', {
+		           get : function(){
+					 return new Promise(function(resolve, reject){	    
+					      global.require(['uglify'], function(UglifyJS){		 
+									 resolve(UglifyJS);
+	    			      });
+					 });   
+				   }
+	});  
+
+	Object.defineProperty(main, 'phpParser', {
+		           get : function(){
+					  return new Promise(function(resolve, reject){	  
+	                       import('php-parser')	 						
+	                      	     .then(function(engine){
+									 resolve(engine.default);
+								 });						  
+					  });
+				   }
+	});  
+
+	Object.defineProperty(main, 'phpFunctions', {
+		           get : function(){
+					  return new Promise(function(resolve, reject){	  
+	                       import('locutus/php/info')	 						
+	                      	     .then(function(php){
+									 resolve(php.default);
+								 });						  
+					  });
+				   }
+	});
+	/**/
 // global.jQuery = require('jquery');	
 // global.$ = global.jQuery;	
      	
 
-process.required([	
-	                                   'ready:jquery',
-	                                    configEvent
-										], function(){	
-	 var states = Array.prototype.slice.call(arguments);
-  
-  global.require(['jquery', 'idle'], function(jquery, idle){	  	 
-	  global.require.s.contexts._.defined['jquery'] = global.jQuery = global.$  = jquery; 
-      global.require.s.contexts._.defined['webfan/frdl-jQuery'] = global.require.s.contexts._.defined['jquery'];  
 
-	    global.jQuery.fn.idle = global.$.fn.idle = idle;			
-	    process.emit('ready:idle', global.jQuery.fn.idle);	
-    });	 
-
- });
 
 
 
@@ -669,7 +1511,7 @@ process.required([
   process.once(configEvent, function(Webfan){
   	 require('@frdl/helper')(frdl)
 			 .then(function(yes){
-					process.emit('ready:frdl:helper', frdl);
+					process.emit(ev_ready_frdl_helper, frdl);
 		 
 						global.require(['inline-worker'], function(InlineWorker){
 						      frdl.InlineWorker = function(func, varsObject) {
@@ -687,7 +1529,10 @@ process.required([
 							  };
 							
 							
-	                          process.emit('ready:inline-worker', frdl.InlineWorker);
+							  process.emit(ev_ready_inline_worker, frdl.InlineWorker);
+						
+							
+	                        
 						});
                             					   
 	           });
@@ -695,9 +1540,52 @@ process.required([
 
 
 
+              (function(frdl){
+                            function WORKER_ENABLED() {
+                                return !!(global === global.window && global.URL && global.Blob && global.Worker);
+                            }
+ 
+                            function InlineWorker(func, self, varsObject) {
+                                var _this = this;
+                                var functionBody = func.toString().trim().match(/^function\s*\w*\s*\([\w\s,]*\)\s*{([\w\W]*?)}$/)[1];
+                                self = self || global;
+								
+								var tplVars = varsObject || global;
+								functionBody = (function(templateString, templateVars){                     
+									return new Function("return `"+templateString +"`;").call(templateVars);                    
+								}(functionBody, tplVars));
+									
+                                if (WORKER_ENABLED()) {
+                                    return new global.Worker(global.URL.createObjectURL(new global.Blob([functionBody], {
+                                        type: "text/javascript"
+                                    })));
+                                }
 
-
-
+								throw new Error('Worker ist not enabled!');
+								
+                                function postMessage(data) {
+                                    process.nextTick(function() {
+                                        _this.onmessage(JSON.stringify({
+                                            data: data
+                                        }));
+                                    });
+                                }
+                                this.self = self;
+                                this.self.postMessage = postMessage;
+                                process.nextTick(function() {func.bind(self, self); });
+                            }
+                            InlineWorker.prototype.postMessage = function postMessage(data) {
+                                var _this = this;
+                               process.nextTick(function() {
+                                    _this.self.onmessage(JSON.stringify({
+                                        data: data
+                                    }));
+                                });
+                            };
+    
+                            frdl.InlineWorker0 = InlineWorker;  
+				          
+			  }(frdl));	
 
 
  
@@ -705,38 +1593,37 @@ process.required([
  process.once(configEvent, function(Webfan){
   global.require(['buffer'], function(Buffer){
 	 global.Buffer = Buffer;
-	 process.emit('ready:buffer', Buffer);	  
+	 process.emit(ev_ready_buffer, Buffer);	  
   });	
  });	
 
 
 
 
-process.once('ready:requirejs', function(){	
+
+
+
+process.required([	
+	                                  ev_ready_requirejs,
+	                    
+										], function(){		
+	// var states = Array.prototype.slice.call(arguments);
+	
   global.require(Webfan.hps.scriptengine.webpack.main)
    .frdl
    .getScript(__CONFIG_MAIN_NEXT_BUNDLE_FILENAME__, function(){
 	   process.emit(configEvent, Webfan );
-   });
-});
+   }, true, false);
+	
+	
+ },  main.frdl.ready, false);
 
 
 
 
-  import('patch-require')
-	  .then(function(patch){
-          patch.default(main, frdl, global);
-	      process.emit('ready:requirejs');
-  });	
 
 
 
-   import('jquery')
-	  .then(function(jquery){
-          global.jQuery = jquery.default;	
-          global.$ = global.jQuery;	
-	      process.emit('ready:jquery');
-  });	
 
 
-
+start(process, main, global);
