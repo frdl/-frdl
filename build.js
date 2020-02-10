@@ -59,6 +59,8 @@ function configWebfanLoader(config) {
 	  }
 	// console.log('content', content); 
 	//  delete config.hps.scriptengine.requirejs;
+	 delete config.hps.scriptengine.webpack.predefine;
+	  
      return "(function(){require('@frdl/webfan').config(\n/*! @@_BEGIN_CONFIG_@@ */\n"+ JSON.stringify(sanitize(config))+"\n/*! @@_END_CONFIG_@@ */\n);}());"
 	   //  + "require.config(require('@frdl/webfan').hps.scriptengine.requirejs);console.log('requirejs configured');"
 	   //   + "console.log(__webpack_chunkname__);console.log(__webpack_hash__);"
@@ -1834,9 +1836,13 @@ module: {
 		  
 	 // new NodeSecurityPlugin(),
 	 
-			
-		//	 new webpack.HashedModuleIdsPlugin(),
-	/*
+		/*	
+			 new webpack.HashedModuleIdsPlugin({
+  hashFunction: 'sha256',
+  hashDigest: 'hex',
+  hashDigestLength: 20
+}),
+	
                new NpmInstallPlugin({
                   // Use --save or --save-dev
                  dev: function(module, path) {
