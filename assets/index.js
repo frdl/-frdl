@@ -30,7 +30,10 @@ var deferBootstrapWindowName = function(clear){
 
 deferBootstrapWindowName();
 
-process = global.process = require('@frdl/process');
+/*
+ process = global.process = require('@frdl/process'); //process is undefined
+*/
+var process = global.process = require('@frdl/process');
 
 //document.querySelector('html').setAttribute('ng-csp', 'no-inline-style;no-unsafe-eval');  
 //document.querySelector('html').setAttribute('ng-non-bindable', 'non-bindable');
@@ -660,7 +663,7 @@ process.required([
 												 // return;
 										 	  }
 										  
-										  var stopper = 16;
+										  var stopper = 1;
 										  while('undefined'===typeof r && o<stopper 
 												&& !$element.hasAttribute('ng-scope')
 												&& ('undefined'===typeof $element.injector || !$element.injector())
@@ -673,6 +676,7 @@ process.required([
 											  }catch(e){
 												 //reject('Cannot AngularJs Bootstrap ' + modules.join(','));
 												  console.warn('Cannot AngularJs Bootstrap ' + modules.join(',') + '\n' + e);
+												  r = false;
 												  break;
 											  }
 										  } 
@@ -685,11 +689,6 @@ process.required([
 						   
 						       });  
 					      	 }).then(function(res){							  										
-			
-							       process.nextTick(function(){													
-								       main.app.removeCloak();												
-							       });	
-		   
 							     return res;
 						      });	 
 						     
@@ -713,17 +712,16 @@ process.required([
 
 
 (function(main){
-  process.once('registerComponent::after', function(){	
-     if(null === document.querySelector('[ng-flows], [ng-flow], [ng-app], app-root') ){
-		process.ready(function(){ 
-			process.nextTick(function(){
-				process.ready(function(){ 
-		              main.app.boot(Webfan.hps.scriptengine.angularjs.rootSelector);
-				});
-			});
+  process.required([
+	  'registerComponent::after',
+	  ev_ready_angularjs_root
+  ], function(){	  
+		process.ready(function(){ 			 
+			if(null === document.querySelector('[ng-flows], [ng-flow], [ng-app], app-root') ){           
+			   main.app.boot(Webfan.hps.scriptengine.angularjs.rootSelector);			
+			}
 		});
-	 }
-  }); 
+   },  main.frdl.ready, false); 
 }(main));
 
 
