@@ -523,7 +523,22 @@ process.required([
 	
 	
 	 process.once(configEvent, function(Webfan){	 
-	       global.require.s.contexts._.defined['filer'] = require('filer.js');	
+	  //     global.require.s.contexts._.defined['filer'] = require('filer.js');	
+	       
+		
+		 if('undefined'===typeof global.require.s.contexts._.defined.filer){
+		   Object.defineProperty(global.require.s.contexts._.defined, 'filer', {
+		           get : function(){
+					  return require('filer.js');															  
+				   }
+	        });	 
+			 
+		 }else{
+			global.require.s.contexts._.defined.filer = require('filer.js'); 
+		 }       
+	       
+	       
+	       
 	   //  global.require.s.contexts._.defined['fs'] = require('@frdl/fs');	
 		 if('undefined'===typeof global.require.s.contexts._.defined.fs){
 		   Object.defineProperty(global.require.s.contexts._.defined, 'fs', {
