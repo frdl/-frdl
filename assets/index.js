@@ -511,6 +511,11 @@ process.required([
 	
 (function(){
  var i = 0;	
+	if('undefined'===typeof global.FileError){
+		global.FileError = global.Error;
+	}
+	
+	
 	Object.defineProperty(frdl, 'fs', {
 		           get : function(){
 					 // if(i<MAX_DEPRECATION_WARNINGS) {
