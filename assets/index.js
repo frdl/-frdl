@@ -6,7 +6,15 @@
 	 }catch(e){
 		  (window || self).global = (new Function("return self || this"))();
 	 }
+
+	 
   }
+
+if ('undefined' === typeof  global.self) {
+	 //patch filer.js
+     global.self = global;	 
+}
+
 
  if ('undefined' === typeof document || 'undefined' === typeof window) {
     require("@frdl/node-browser-shim")((new Function("return self || this"))());
@@ -72,7 +80,8 @@ const ev_defined_jquery = 'defined:jquery';
 const ev_ready_dom_query_old = 'ready:dom-query-old';
 const ev_ready_angularjs_root = 'ready:angularjs:root';
 const ev_ready_fs = 'ready:fs';
-
+const ev_ready_fs_defined = 'ready:fs:defined';
+const ev_ready_start = 'ready:start';
 
 const ev_ready_deps = 'frdl.ready.deps';
 //'frdl.ready.deps'
@@ -123,11 +132,16 @@ function start(process, main, global){
   loadRequireJs();	
 	
  if('undefined'!==typeof global.jQuery && 'undefined'!==typeof global.$ && global.$ === global.jQuery){
-   process.emit(ev_ready_jquery);
+   process.emit(ev_ready_jquery, true);
  }else{
    loadJQUery();
  }
 
+	process.emit(ev_ready_start, true);
+	
+
+	
+	 
 
 }(function(){
         import('jquery')
@@ -509,42 +523,86 @@ process.required([
 	});
 }());	
 	
-(function(){
- var i = 0;	
-	if('undefined'===typeof global.FileError){
-		global.FileError = global.Error;
-	}
+
+
+
+
+
+
+
+
+(function(){	
+	var _fs = false;
+//	if('undefined'===typeof global.FileError && 'undefined' !== typeof global.Error){ 
+//		global.FileError = global.Error;
+//	}
 	
 	
-	Object.defineProperty(frdl, 'fs', {
+	
+	  Object.defineProperty(main.frdl, 'fs', {
 		           get : function(){
-					 // if(i<MAX_DEPRECATION_WARNINGS) {
-					//	  console.warn('frdl.fs will maybe deprecated later...,use require(\'@frdl/fs\') or require(\'fs\')  instead!');
-					//   i++;
-					//  }
-					  return require('@frdl/fs');															  
+					   if(false === _fs){
+						 _fs = frdl.co(function*(){  						    
+							 return yield main.Filesystem;
+						}).then(function(r){
+							 _fs = r;
+							 	 _fs.then=function(fn){		 
+									 fn(_fs);	
+								 };
+						 });  
+					   }
+				      return _fs;  
+				   },
+		           set : function(myFs){
+					   console.warn('You SHOULD not set frdl.fs!');
+					   _fs = myFs;
 				   }
-	});
-	
-	
-	 process.once(configEvent, function(Webfan){	 
-	  //     global.require.s.contexts._.defined['filer'] = require('filer.js');	
-	       
+	   });
+
+
+
 		
-		 if('undefined'===typeof global.require.s.contexts._.defined.filer){
-		   Object.defineProperty(global.require.s.contexts._.defined, 'filer', {
+		Object.defineProperty(main, 'Filesystem', {
 		           get : function(){
-					  return require('filer.js');															  
+					  return new Promise(function(resolve, reject){	  
+					
+	                       import('@frdl/fs')	 						
+	                      	     .then(function(fs){
+									 resolve(fs.default);
+								 });						  
+					
+					  });
 				   }
-	        });	 
-			 
-		 }else{
-			global.require.s.contexts._.defined.filer = require('filer.js'); 
-		 }       
-	       
-	       
-	       
-	   //  global.require.s.contexts._.defined['fs'] = require('@frdl/fs');	
+	   });
+	
+	/*
+  process.required([
+	configEvent,
+	ev_ready_start,	
+	ev_ready_requirejs,  
+ 
+  ], function(){	 
+			main.Filesystem.then(function(fs){	
+				frdl.fs = fs;
+	            process.emit(ev_ready_fs_defined, fs);
+			}).catch(function(reason){
+				frdl.alert.error(reason);
+			});		 
+		 
+  }, frdl.ready, false);
+	*/
+
+	
+	
+	process.required([
+	 configEvent,	
+	 ev_ready_requirejs, 	
+	// ev_ready_fs_defined,	
+  ], function(){	
+		
+ //  global.require.s.contexts._.defined['fs'] = require('@frdl/fs');	
+	
+		
 		 if('undefined'===typeof global.require.s.contexts._.defined.fs){
 		   Object.defineProperty(global.require.s.contexts._.defined, 'fs', {
 		           get : function(){
@@ -553,7 +611,7 @@ process.required([
 	        });	 
 			 
 		 }else{
-			global.require.s.contexts._.defined.fs = frdl.fs; 
+	//		global.require.s.contexts._.defined.fs = frdl.fs; 
 		 }
 		 
 		 
@@ -566,11 +624,54 @@ process.required([
 	        });	 
 			 
 		 }else{
-			global.require.s.contexts._.defined['@frdl/fs'] = global.require.s.contexts._.defined.fs; 
-		 }
-		   process.emit(ev_ready_fs, true);	
-		 
-		 
+		//	global.require.s.contexts._.defined['@frdl/fs'] = frdl.fs; 
+		 }			
+ 
+		
+			
+		if('undefined'===typeof global.require.s.contexts._.defined.filer){
+		   Object.defineProperty(global.require.s.contexts._.defined, 'filer', {
+		           get : function(){
+					//  return require('filer.js');	
+					    return require('patch-filer');	
+				   }
+	        });	 
+			 
+		 }else{
+		//	global.require.s.contexts._.defined.filer = require('filer.js'); 
+			// global.require.s.contexts._.defined.filer = require('patch-filer'); 
+		 }     
+		
+		   	
+	      process.emit(ev_ready_fs, true);
+		
+   },  main.frdl.ready, false);
+	
+	
+
+	
+
+}());	
+
+
+
+
+
+
+
+
+
+(function(){
+ var i = 0;	
+
+	  
+	
+	 	
+	
+
+
+	
+	 process.once(configEvent, function(Webfan){	 	 
 		 
 		 
 		 
