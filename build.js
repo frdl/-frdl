@@ -25,7 +25,7 @@ var download = require('@frdl/simple-downloader');
  //if ('undefined' === typeof global.define){
 	// define = global.define =  require('amdefine');		
 // }
-var {extend, clone, sanitize, each, extractTextBetween, mt_rand, preg_quote, str_replace} = require('@frdl/functions');
+var {extend, clone, sanitize, each, extractTextBetween, mt_rand, preg_quote, str_replace, urlencode} = require('@frdl/functions');
 
 //var sort = require('@frdl/sort');	
 //console.log(extend);
@@ -186,6 +186,7 @@ var __ENTRY__ = __ENTRY__ ||'index.js';
 	
 var __MAIN__ = __MAIN__ || __ENTRY__.split(/\.js/)[0];	
 	
+var __CONFIG_MAIN_NEXT_BUNDLE_CONTENT_3__	= '';	
 var __CONFIG_MAIN_NEXT_BUNDLE_CONTENT_2__	= '';
 
 var __CONFIG_MAIN_NEXT_BUNDLE_CONTENT_1__	= '';	
@@ -353,106 +354,22 @@ WebfanConfig.hps.scriptengine.webpack = WebfanConfig.hps.scriptengine.webpack ||
 	main : __MAIN__,
 	predefine : {
 		umd : [],
+		amdRaw : [
+		  'angular-frdl',
+		],
 		amd : [
-			/*
-		       'webfan/navigator/json-rpc-worker',
-			   'Webfan.hps.rpc',
-			   'JsonRpcClient',
-			   'Webfan.hps.Router',
-			   'amd-loader/frdlweb/amd-loader',
-			   'amd-loader',
-			   'webfan/hps-features-implementation',
-			   'implementations',
-			   'feature/feature',
-			   'webfan/simple-batch',
-			   'webfan/navigator/ng-app-module',
-			   'webfan/navigator/ui',
-			   'webfan/navigator/webfan-nav',
-			   'webfan/navigator/webfan-widget',
-			   'angular-ui-bootstrap/angular-ui-bootstrap',
-			   'angular-ui-select/ui-select',
-			   'angular-xeditable/angular-xeditable',
-			   'mobile-detect/mobile-detect',
-			   'modernizr',
-			   'frdl',
-			   'co'
-			   
-			  	
-			
-			
-			   'amd-loader/frdlweb/amd-loader',
-			   'amd-loader',
-			   'webfan/cjs/frdlcjs',
-			    'frdlcjs',
-			'webfan/bootcache',
-			'webfan/loadPlain',
-			'webfan/loadXML',
-			 
-			   'webfan/hps-features-implementation',
-			   'implementations',	
-			   'feature/feature',
-		*/
-			
-			 //  'bootstrap-4/js/bootstrap-bundle',
-			 //  'angular-ui-bootstrap/angular-ui-bootstrap',
-			 //  'angular-ui-select/ui-select',
-			 //  'angular-xeditable/angular-xeditable',
-			 
-			/*
-		       'webfan/navigator/json-rpc-worker',
-			   'Webfan.hps.rpc',
-			   'JsonRpcClient',
-			   'Webfan.hps.Router',
-			//   'mimemessage',
-			
-			   'util',
-			*/
-			
-			//'filer',
-			   'amd-loader/frdlweb/amd-loader',
-			   'amd-loader',
-			//   'webfan/cjs/frdlcjs',
-			//    'frdlcjs',
-		//	'webfan/bootcache',
-		//	'webfan/loadPlain',
-		//	'webfan/loadXML',	
-			'webfan/load-js',
-			
-		
-			
+		    'amd-loader/frdlweb/amd-loader',
+		    'amd-loader',
+			'webfan/load-js',			
 			'util',
 			'url',
-			'path',
-			
+			'path',			
 			'ieee754',			
 			'base64-js',
 			'buffer',
-			'querystring',
-			
-			
-			'idle',
-			
-			'literalizer',
+			'querystring',			
+			'idle',	
 			'inline-worker',
-			
-			
-			
-
-			
-		//	'webfan/jquery-addons',
-			
-		//	'webfan/frdl-jQuery',
-			
-		/*
-			'webfan/webfanURLParser',
-			'dom-legacy',
-			'frdl-dom-query-old',
-			
-			
-			
-			
-			'webfan/loadXML',
-			*/
 		]
 	},
 	
@@ -493,14 +410,19 @@ WebfanConfig.hps.scriptengine.angularjs.mainInject = WebfanConfig.hps.scriptengi
 	];
 
 
+	
 if(__DEFAULTS__){
 	
+WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('literalizer');		
 	
 	
+WebfanConfig.hps.scriptengine.webpack.predefine.amdRaw.push('angular-ui-bootstrap/angular-ui-bootstrap');		
+WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('bootstrap-4/js/bootstrap-bundle');		
 WebfanConfig.hps.scriptengine.angularjs.mainRequire.push('bootstrap-4/js/bootstrap-bundle');	
 WebfanConfig.hps.scriptengine.angularjs.mainRequire.push('angular-ui-bootstrap/angular-ui-bootstrap');
 WebfanConfig.hps.scriptengine.angularjs.mainInject.push('ui.bootstrap');		
 	
+WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('ng-sanitize');	
 WebfanConfig.hps.scriptengine.angularjs.mainRequire.push('ng-sanitize');
 WebfanConfig.hps.scriptengine.angularjs.mainInject.push('ngSanitize');		
 		
@@ -529,15 +451,8 @@ WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('dom-legacy');
 WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('frdl-dom-query-old');
 WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('webfan/jquery-addons');
 		
-
 	
-//WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('angular-frdl');	
-WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('ng-sanitize');		
-WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('bootstrap-4/js/bootstrap-bundle');	
-	
-	
-//NO, ERROR: WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('angular-frdl');	
-	 
+		 
 	
 WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('frdlweb.rpc');
 WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('JsonRpcClient');	
@@ -546,7 +461,8 @@ WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('JsonRpcClient');
 WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('webfan/hps/dsgvo-cookiechoices');		
 WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('dsgvo-adsense');	
 	
-	
+		
+//WebfanConfig.hps.scriptengine.webpack.predefine.amdRaw.push('angular-frdl');	
 
 
 WebfanConfig.hps.scriptengine.lazy.push({
@@ -693,7 +609,8 @@ WebfanConfig.hps.scriptengine.frdlweb.components.legacy =
 	  type : 'amd-callback',
 	  once : true,		
 	  load : [		
-		'webfan/load-js!${this.Webfan.hps.scriptengine.webpack.__PUBLIC_PATH__}frdl-legacy-component.${this.Webfan.hps.scriptengine.hash}.js?t=${this.Webfan.hps.scriptengine.webpack.hash}',
+	//	'webfan/load-js!${this.Webfan.hps.scriptengine.webpack.__PUBLIC_PATH__}frdl-legacy-component.${this.Webfan.hps.scriptengine.hash}.js?t=${this.Webfan.hps.scriptengine.webpack.hash}',
+		'${this.Webfan.hps.scriptengine.webpack.__PUBLIC_PATH__}frdl-legacy-component.${this.Webfan.hps.scriptengine.hash}.js?t=${this.Webfan.hps.scriptengine.webpack.hash}',
 	  ]
 	},
 		
@@ -934,8 +851,8 @@ __CONFIG_MAIN_NEXT_BUNDLE_CONTENT_1__
 	
 
 			//	  + "define('angular-frdl', function(){return require('" + WebfanConfig.hps.scriptengine.webpack.main + "').angular;});"
-				  + "define('angular', ['angular-frdl'], function(){return angular;});"
-				  + "define('angularjs', ['angular-frdl'], function(){return angular;});"
+				//  + "define('angular', ['angular-frdl'], function(){return angular;});"
+			//	  + "define('angularjs', ['angular-frdl'], function(){return angular;});"
 	
 				  + "define('EventEmitter', function(){return require('@frdl/eventemitter');});"
 				  + "define('eventemitter', function(){return require('@frdl/eventemitter');});"
@@ -1010,11 +927,17 @@ yield new Promise(function(resolve,reject){
 
 
 	
-
+	
+ 
+ m = [];	
  for(i=0; i<WebfanConfig.hps.scriptengine.webpack.predefine.amd.length;i++){
-	m = WebfanConfig.hps.scriptengine.webpack.predefine.amd[i];	
-	url =  WebfanConfig.hps.scriptengine.requirejs.baseUrl + m + '.js';		
-	yield download(url, {
+	m.push(WebfanConfig.hps.scriptengine.webpack.predefine.amd[i]);	
+	 
+ }//for 	 
+ url = __PROTOCOL__+'//'+__HOST__+config.hps.scriptengine.urls.library + '?version='+(new Date()).getFullYear()+'.'+(((new Date()).getMonth())+1)+'.'+(new Date()).getDay() + '&node_modules='
+	  + urlencode(m.join(','));
+	
+ yield download(url, {
 	  callback : function (e, r) {
              if(e){
 				// throw e;
@@ -1030,14 +953,35 @@ yield new Promise(function(resolve,reject){
 		        }
 	        } 
 	     });	  	
- }//for 
-	
-
-
 
 	
-
+ m = [];	
+ for(i=0; i<WebfanConfig.hps.scriptengine.webpack.predefine.amdRaw.length;i++){
+	m.push(WebfanConfig.hps.scriptengine.webpack.predefine.amdRaw[i]);	
+	 
+ }//for 	 
+ url = __PROTOCOL__+'//'+__HOST__+config.hps.scriptengine.urls.library + '?version='+(new Date()).getFullYear()+'.'+(((new Date()).getMonth())+1)+'.'+(new Date()).getDay() + '&node_modules='
+	  + urlencode(m.join(','));
 	
+ yield download(url, {
+	  callback : function (e, r) {
+             if(e){
+				// throw e;
+				 console.error(e);
+				 process.exit(1);
+			 }else{
+				  __CONFIG_MAIN_NEXT_BUNDLE_CONTENT_3__ += r.data + '\n';
+			 }
+ 	 },
+	  always : function(){
+		        if('undefined'!==process.env.DEBUG && false !== process.env.DEBUG){
+		           console.log('Requested: ', url);		 
+		        }
+	        } 
+	     });	
+	
+	
+
 
  
 	url = __PROTOCOL__+'//'+__HOST__+'/manifest.webapp';
@@ -1304,6 +1248,7 @@ var O = {
         
 	    process: '@frdl/process', 
         vm: '@frdl/vm',
+		'filer.js' : 'patch-filer',
 		fs : '@frdl/fs',
 		'@frdl/functions' : path.dirname(require.resolve('@frdl/functions')),
 		'@frdl/vm' : path.dirname(require.resolve('@frdl/vm')),
@@ -1515,7 +1460,8 @@ webpack([
 	 extensions: ['.js'] // File types
 },
 module: {
-    noParse: /requirejs|uglify\-browser/,  //|betafcc\/is
+   // noParse: /requirejs|uglify\-browser|filer/,  //|betafcc\/is
+	noParse: /requirejs|uglify\-browser|angular\-frdl/,  //|betafcc\/is
     rules: [
 	 /* 
 	 {
@@ -1568,7 +1514,7 @@ module: {
       test: /(\.js)$/,
    //   exclude: /(node_modules|bower_components)/,
 	//  exclude: /(assets)/,		
-	  exclude : new RegExp('^(' + preg_quote(__ENTRY__) +')|(index)|(betafcc\/is)|(patch\-require)|(uglify\-browser)|^co$'),		
+	  exclude : new RegExp('^(' + preg_quote(__ENTRY__) +')|(index)|(betafcc\/is)|(patch\-require)|(uglify\-browser)|(angular\-frdl)|^co$'),		
       use: [{
         // babel-loader to convert ES6 code to ES5 + amdCleaning requirejs code into simple JS code, taking care of modules to load as desired
         loader: 'babel-loader',
@@ -1826,6 +1772,9 @@ module: {
 				
 				code = result.code;
 	 
+				
+				code += '\n';
+				code += __CONFIG_MAIN_NEXT_BUNDLE_CONTENT_3__;
 				return code;
             }
         }),	 		  
