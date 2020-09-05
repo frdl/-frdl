@@ -1,31 +1,66 @@
+
 'use strict';
 
- if ('undefined' === typeof ((window || self).global)) {
-	 try{
-       ((new Function("return self || this"))())['global'] = (new Function("return self || this"))();
-	 }catch(e){
-		  (window || self).global = (new Function("return self || this"))();
-	 }
+var MAX_DEPRECATION_WARNINGS = 1;
+var main = exports = module.exports = require('frdl-library-main')(__webpack_chunkname__);
+//global.process = main.process;
+var Webfan = main.Webfan;
+var MAIN = main.Webfan.hps.scriptengine.webpack.main;
+module.name = MAIN;
+var emitter =  main.emitter;
 
-	 
-  }
+var frdl = main.frdl; 
+var oLog = false;
 
-if ('undefined' === typeof  global.self) {
-	 //patch filer.js
-     global.self = global;	 
+var __CONFIG_MAIN_NEXT_BUNDLE_FILENAME__ = main.Webfan.hps.scriptengine.webpack.__PUBLIC_PATH__ + main.Webfan.hps.scriptengine.webpack.__CONFIG_MAIN_NEXT_BUNDLE_FILENAME__;
+main.Webfan.hps.scriptengine.frdlweb.configfile = [];
+var configEventDeprecated = 'after.'+__CONFIG_MAIN_NEXT_BUNDLE_FILENAME__;
+
+main.Webfan.hps.scriptengine.webpack.chunkname= __webpack_chunkname__;	
+main.Webfan.hps.scriptengine.webpack.hash = __webpack_hash__;
+
+main.Webfan.hps.scriptengine.server.origin =( (1 == main.Webfan.hps.scriptengine.server.ssl)
+     ? 'https://'
+     : 'http://'
+  ) +  main.Webfan.hps.scriptengine.server.host;	
+
+var configEvent = 'after.config';
+var ev_ready_requirejs = 'ready:requirejs';
+var ev_ready_main = 'ready:main';
+var ev_ready_jquery = 'ready:jquery';
+var ev_ready_jquery_lazy = 'ready:jquery-lazy';
+var ev_ready_idle = 'ready:idle';
+var ev_ready_buffer = 'ready:buffer';
+var ev_ready_inline_worker = 'ready:inline-worker';
+var ev_ready_frdl_helper = 'ready:frdl:helper';
+var ev_defined_jquery = 'defined:jquery';
+var ev_ready_dom_query_old = 'ready:dom-query-old';
+var ev_ready_angularjs_root = 'ready:angularjs:root';
+var ev_ready_fs = 'ready:fs';
+var ev_ready_fs_defined = 'ready:fs:defined';
+var ev_ready_start = 'ready:start';
+var ev_ready_alertify = 'ready:alertify';
+var ev_ready_watchfor = 'ready:watchfor';
+var ev_ready_co = 'ready:co';
+var ev_ready_symbol_modules = 'ready:mainModules:symboled';	
+var ev_ready_deps = 'frdl.ready.deps';
+var ev_ready_include_downloader = 'ready:includes:downloader';
+var ev_ready_include_lazy_members = 'ready:includes:lazy.members';
+var NG_ENABLE_DEBUG_INFO = /^NG_ENABLE_DEBUG_INFO\!/;
+var NG_DEFER_BOOTSTRAP = /^NG_DEFER_BOOTSTRAP\!/;
+
+	
+main.frdl.sort = require('@frdl/sort');
+main.frdl.is = require('@frdl/var-typing')();
+
+function debugInfoWindowName(clear){
+	if('undefined'!==typeof global.intent || 'undefined'===typeof window){
+		return;
+	}
+	var winName = window.name;
+    window.name= 'NG_ENABLE_DEBUG_INFO!' + winName.replace(NG_ENABLE_DEBUG_INFO, '');
 }
-
-
- if ('undefined' === typeof document || 'undefined' === typeof window) {
-    require("@frdl/node-browser-shim")((new Function("return self || this"))());
- }
-
-  
-const NG_ENABLE_DEBUG_INFO = /^NG_ENABLE_DEBUG_INFO!/;
-const NG_DEFER_BOOTSTRAP = /^NG_DEFER_BOOTSTRAP!/;
-
-
-var deferBootstrapWindowName = function(clear){
+function deferBootstrapWindowName(clear){
 	if('undefined'!==typeof global.intent || 'undefined'===typeof window){
 		return;
 	}
@@ -34,143 +69,31 @@ var deferBootstrapWindowName = function(clear){
 	                 ? winName.replace(NG_DEFER_BOOTSTRAP, '')
 		             : 'NG_DEFER_BOOTSTRAP!'+winName.replace(NG_DEFER_BOOTSTRAP, '')
 	;
-};
+}
+main.debugInfoWindowName = debugInfoWindowName;
+main.deferBootstrapWindowName = deferBootstrapWindowName;
+main.deferBootstrapWindowName(false);
 
-deferBootstrapWindowName();
-
-/*
- process = global.process = require('@frdl/process'); //process is undefined
-*/
-var process = global.process = require('@frdl/process');
-
-//document.querySelector('html').setAttribute('ng-csp', 'no-inline-style;no-unsafe-eval');  
-//document.querySelector('html').setAttribute('ng-non-bindable', 'non-bindable');
-
-
-var MAX_DEPRECATION_WARNINGS = 1;
-var Webfan = require('@frdl/webfan');	
-const MAIN = Webfan.hps.scriptengine.webpack.main;
-var main = exports = module.exports =  Webfan.setup(MAIN, {}, {}/* global */, Webfan.hps.scriptengine.frdlweb.version);
-var is = require('@betafcc/is');  
-
-
-
-var frdl = require('@frdl/functions');
-
-
-
-
-
-
-Webfan.hps.scriptengine.webpack.chunkname= __webpack_chunkname__;	
-Webfan.hps.scriptengine.webpack.hash = __webpack_hash__;
-//require.__webpack_require__.p || Webfan .hps.scriptengine.webpack.__PUBLIC_PATH__
-var __CONFIG_MAIN_NEXT_BUNDLE_FILENAME__ = Webfan .hps.scriptengine.webpack.__PUBLIC_PATH__ + Webfan.hps.scriptengine.webpack.__CONFIG_MAIN_NEXT_BUNDLE_FILENAME__;
-const configEvent = 'after.'+__CONFIG_MAIN_NEXT_BUNDLE_FILENAME__;
-
-const ev_ready_requirejs = 'ready:requirejs';
-const ev_ready_main = 'ready:main';
-const ev_ready_jquery = 'ready:jquery';
-const ev_ready_jquery_lazy = 'ready:jquery-lazy';
-const ev_ready_idle = 'ready:idle';
-const ev_ready_buffer = 'ready:buffer';
-const ev_ready_inline_worker = 'ready:inline-worker';
-const ev_ready_frdl_helper = 'ready:frdl:helper';
-const ev_defined_jquery = 'defined:jquery';
-const ev_ready_dom_query_old = 'ready:dom-query-old';
-const ev_ready_angularjs_root = 'ready:angularjs:root';
-const ev_ready_fs = 'ready:fs';
-const ev_ready_fs_defined = 'ready:fs:defined';
-const ev_ready_start = 'ready:start';
-
-const ev_ready_deps = 'frdl.ready.deps';
-//'frdl.ready.deps'
-
-
-
-
-
-		
-
-
-process.addReadyCheck(function(){
-	return 'undefined' !== typeof global.require && 'undefined' !== typeof global.require.main;
+main.process.addReadyCheck(function(){
+  return 'undefined' !== typeof global && 'undefined' !== typeof global.require && 'undefined' !== typeof global.require.main;
+});
+main.process.addReadyCheck(function(){
+  return 'complete' === global.document.readyState;
+});
+main.process.addReadyCheck(function(){
+  return main.frdl.ready && main.frdl.ready.readyMain && main.frdl.ready.readyMain.stateReady();
 });
 
 
-process.once(ev_ready_requirejs, function(s){	
-
-	if('undefined'!==typeof global.require.main){	
-        console.warn('require.main is already set (try to overwrite module `' + MAIN	+ '` as `require.main`)');	
-	}
-
-	global.require.main = ('undefined' === typeof global.require.main) 
-		 ? main
-	     : frdl.extend( global.require.main, main);	
-});							
-			
-
-/*
-process.required([
-	               ev_ready_requirejs,
-	               configEvent,
-				 ], function(){	
-	 var states = Array.prototype.slice.call(arguments);
-	     global.require.s.contexts._.defined['frdl'] =('undefined' === typeof global.frdl) 
-	                                                    ? global.require.main.frdl
-	                                                    : global.frdl;
-},  frdl.ready);
-*/
-
-
-
-function start(process, main, global){
-	
-(function(loadJQUery, loadRequireJs){
-	
-	
-  loadRequireJs();	
-	
- if('undefined'!==typeof global.jQuery && 'undefined'!==typeof global.$ && global.$ === global.jQuery){
-   process.emit(ev_ready_jquery, true);
- }else{
-   loadJQUery();
- }
-
-	process.emit(ev_ready_start, true);
-	
-
-	
-	 
-
-}(function(){
-        import('jquery')
-	       .then(function(jquery){
-	           global.jQuery = global.$  = jquery.default;
-	           process.emit(ev_ready_jquery);
-       });		
-},
- function(){
-  import('patch-require')
-	  .then(function(patch){
-          patch.default(main, main.frdl, global);
-	      process.emit(ev_ready_requirejs);
-  });	
-}));
-
-	
-}//function start()
-
-
-
-
-
-
-(function(){
-var oLog = console.log;
-	
 var d = function(m){
 	var c = m || sessionStorage.getItem('frdl.debug.mode');
+	if('false'===c){
+	  c=false;
+	  return c;	
+	}else if('true'===c){
+	  c=true;	
+	  return c;	
+	}
 	try{
 		 if(!isNaN(c)){
 			return c; 
@@ -186,184 +109,271 @@ var d = function(m){
 	}
 };
 
-frdl.debug = {
+
+
+main.frdl.debug = {
    mode : function(m){
          if('undefined'!==typeof m){
-           process.env.DEBUG =m;
+           main.process.env.DEBUG =m;
          }
 	   
-		 if(isNaN(process.env.DEBUG)){
-			process.env.DEBUG = d(process.env.DEBUG); 
+		 if(isNaN(main.process.env.DEBUG)){
+			main.process.env.DEBUG = d(main.process.env.DEBUG); 
 		 }	   
+	  
+	   if(false === oLog){
+	     oLog = frdl.clone(global.console.log);
+	   }
 	   
-	    if(process.env.DEBUG <=0){
-			 console.log=function(){};	
-		}else{
-		     console.log=oLog;		
+	    if(main.process.env.DEBUG <=0){
+			 global.console.log=(function(){});	
+		}else if(main.process.env.DEBUG > 0){
+		     global.console.log=oLog.bind(global.console);		
 		}
 	   
-        return process.env.DEBUG;
+	    if('undefined'===typeof global.console.notice){
+		   global.console.notice=global.console.warn;	
+		}
+	   
+        return main.process.env.DEBUG;
   },
   default :	(sessionStorage && d() ) 
 		      ? d()
-		      : 'EXPERIMENTAL' === Webfan.hps.context.STAGE || /iphone/i.test(navigator.userAgent)
+		      : 'EXPERIMENTAL' === main.Webfan.hps.context.STAGE || /iphone/i.test(navigator.userAgent)
 			
  };		
 
-/*	
- if(!frdl.debug.default){
-    console.log=function(){};		 
- }else{
-	 frdl.debug.mode(frdl.debug.default);
- }
-*/
- frdl.debug.mode(frdl.debug.default);
+	if('frdl'=== main.process.shim){   
+		main.frdl.debug.mode(main.frdl.debug.default);
+	}
+   	
 
 
-frdl.time= function(){
+main.frdl.time= function(){
 	return (new Date()).getTime();
 };
-}());
 
 
 
-	
 
 
 
-(function(){
-var i;
-	
-	Object.defineProperty(frdl, 'ready', {
+		   Object.defineProperty(global, Symbol.for('Webfan'), {
 		           get : function(){
-					  return  process.ready;																	  
+					  return main.Webfan;															  
+				   }
+	        });	 
+
+		   Object.defineProperty(global, Symbol.for('frdl'), {
+		           get : function(){
+					  return main.frdl;															  
+				   }
+	        });	 
+
+		   Object.defineProperty(global, Symbol.for('frdlweb'), {
+		           get : function(){
+					  return main;															  
+				   }
+	        });	 
+		   Object.defineProperty(global.process, Symbol.for('Webfan'), {
+		           get : function(){
+					  return main.Webfan;															  
+				   }
+	        });	
+
+		   Object.defineProperty(global.process, Symbol.for('frdl'), {
+		           get : function(){
+					  return main.frdl;															  
+				   }
+	        });	 
+
+		   Object.defineProperty(global.process, Symbol.for('frdlweb'), {
+		           get : function(){
+					  return main;															  
+				   }
+	        });	 
+
+
+	Object.defineProperty(main.frdl, 'ready', {
+		           get : function(){
+					  return  emitter.ready;																	  
 				   }
 	});		
 		
-	Object.defineProperty(frdl, 'addReadyCheck', {
+	Object.defineProperty(main.frdl, 'addReadyCheck', {
 		           get : function(){
-					  return  process.addReadyCheck;																	  
+					  return  emitter.addReadyCheck;																	  
 				   }
 	});	
 
-	Object.defineProperty(frdl, 'guid', {
+
+
+emitter.on(configEvent, function(Webfan){
+  emitter.emit(configEventDeprecated, Webfan);
+});
+
+
+emitter.once(ev_ready_requirejs, function(s){	
+
+	if('undefined'!==typeof global.require.main){	
+        console.warn('require.main is already set (try to overwrite module `' + MAIN	+ '` as `require.main`)');	
+	}
+
+	global.require.main = ('undefined' === typeof global.require.main) 
+		 ? main
+	     : main.frdl.extend( global.require.main, main);	
+	
+	
+	
+  (function(){
+     var i = 0;	
+
+	Object.defineProperty(main.frdl, 'state', {
 		           get : function(){
-					            i++;
-					 			 var t = frdl.explode('.', frdl.microtime() .toString() );				   
-		                    	 var id =  frdl.dechex( parseInt(t[0]) )
-							    +'-'
-						        +   frdl.dechex( parseInt(t[1]) )	   
-							   +'-'   
-							   + frdl.dechex( frdl.mt_rand() )
-						       + '-'
-						       + i.toString() 
-					  ;				   
-			             return frdl.str_replace('.', '-', id);																  
-				   }
-	});	
-	
-	
-	
-
-	
-	Object.defineProperty(frdl, 'is', {
-		           get : function(){
-					  return is;																  
-				   }
-	});	
-	
- 
-	
-
-
-	Object.defineProperty(frdl, 'slice', {
-		           get : function(){
-					  return require('sliced');																  
-				   }
-	});
-
-  
-
-	Object.defineProperty(frdl, 'context', {
-		           get : function(){
-					  return require('async-context');															  
-				   }
-	});   		
-	
-
-
- 
-require('@frdl/sort');
-}());
-
-
-
-
-(function(){
- var i = 0;	
-	/*
-	Object.defineProperty(global, 'Webfan', {
-		           get : function(){
-					   if(i<MAX_DEPRECATION_WARNINGS){
-						   console.warn('global.Webfan will maybe deprecated later..., require(\'@frdl/webfan\') instead!');
+					   if(i<MAX_DEPRECATION_WARNINGS) {
+						   console.warn('frdl.state will maybe deprecated later...,use "?"   instead!');
 					   i++;
 					   }
-					  return Webfan;																	  
+					  return global.require.state;															  
 				   }
 	});
+  }());	
+});							
+			
 
-*/
 
-	Object.defineProperty(main, 'Webfan', {
-		           get : function(){
-					  return Webfan;																	  
-				   }
-	});
+
+
+   
+function WORKER_ENABLED(){
+   return !!(global === global.window && global.URL && global.Blob && global.Worker);
+}
+ 
+                          
+function InlineWorker(func, self, varsObject) {
+                                var _this = this;
+                                var functionBody = func.toString().trim().match(/^function\s*\w*\s*\([\w\s,]*\)\s*{([\w\W]*?)}$/)[1];
+                                self = self || global;
+								
+								var tplVars = varsObject || global;
+								functionBody = (function(templateString, templateVars){                     
+									return new Function("return `"+templateString +"`;").call(templateVars);                    
+								}(functionBody, tplVars));
+									
+                                if (WORKER_ENABLED()) {
+									
+									var objectUrl = global.URL.createObjectURL(new global.Blob([functionBody], {
+                                        type: "text/javascript"
+                                    }))
+									
+									var arbeiter = new global.Worker(objectUrl);
+									main.process.nextTick(function(){
+									  global.URL.revokeObjectURL(objectUrl);
+									});									
+									return arbeiter;
+                                }
+
+								throw new Error('Worker ist not enabled!');
+								
+                                function postMessage(data) {
+                                    main.process.nextTick(function() {
+                                        _this.onmessage(JSON.stringify({
+                                            data: data
+                                        }));
+                                    });
+                                }
+                                this.self = self;
+                                this.self.postMessage = postMessage;
+                                main.process.nextTick(function() {func.bind(self, self); });
+                            }
+                            InlineWorker.prototype.postMessage = function postMessage(data) {
+                                var _this = this;
+                               main.process.nextTick(function() {
+                                    _this.self.onmessage(JSON.stringify({
+                                        data: data
+                                    }));
+                                });
+                          
+							};                         
+main.frdl.InlineWorker0 = InlineWorker;  
+
+
+function getRequireRemoteModulePromiseFunction(module){
+  return new Promise(function(resolve, reject){	
+	 global.require(['requireRemoteModulePromise'], function(requireRemoteModulePromise){		
+		 requireRemoteModulePromise(module).then(function(r){		
+			 resolve(r);	
+		 }).catch(function(e){		
+			 reject(e);	
+		 });	
+	 });
+  });	
+}
 	
-	Object.defineProperty(main, 'frdl', {
-		           get : function(){
-					  return frdl;	               															  
-				   }
-	});			
-	
-}());
+main.requireRemoteModulePromise = function(module){
+  if('undefined'!==typeof main.frdl.ready && 'undefined'!==typeof main.frdl.ready.readyMain && true === main.frdl.ready.readyMain.stateReady(configEvent) ){	
+     return getRequireRemoteModulePromiseFunction(module);
+  }else{
+	    return new Promise(function(resolve, reject){	
+			emitter.once(configEvent, function(){
+				getRequireRemoteModulePromiseFunction(module).then(function(r){				
+					resolve(r);			
+				}).catch(function(e){			
+					reject(e);			
+				});
+			});
+	    });	
+  }
+};
+		
+
+main.process.required([
+	               ev_ready_alertify
+				 ], function(){	
+
+ (global || window || self).onerror = function (msg, url, lineNo, columnNo, error) {
+  var str = msg.toLowerCase();
+  var substring = "script error";
+  if (str.indexOf(substring) > -1){
+   // require(Symbol.for('frdl')).alert.alert('Script Error: See Browser Console for Detail');
+    var msg = 'Script Error: See Browser Console for Detail';
+    var msg2 = 'Script Error: See Browser Console for Detail';
+  } else {
+    var message = [
+    //  'Message: <error>' + msg + '</error>',
+      '<error>' + msg + '</error>',
+      'URL: ' + url,
+      'Line: ' + lineNo,
+      'Column: ' + columnNo,
+      'Error object: ' + JSON.stringify(error)
+    ];
+
+   // require(Symbol.for('frdl')).alert. alert(message);
+    // var msg = (new require.main.frdl.$j('body')).renderJSON(message);
+     var msg = '<h3 class="text-danger">Error on '+(global || window).location.host+'</h3>' + message.join("<br />");
+     var msg2 = {title:'An error occoured on the page '+(global || window).location.host,
+                      //message:'<pre>' + message.join("\n") + '</pre>'
+                    message: message.join("\n") 
+               };
+  }
+
+  main.frdl.alert.error(msg2);
+  if(main.process.env.DEBUG){
+	  main.frdl.alert.error(msg);
+  }
+
+  return false;
+ };	
+},  main.frdl.ready);
 
 
-(function(){
-	Object.defineProperty(main, 'vm', {
-		           get : function(){
-					  return require('@frdl/vm');																  
-				   }
-	});
-}());
 
 
 
-
-
-
-
-  
-
-
-	
-frdl.ready.readyMain = process.required([
-	ev_ready_requirejs,
-	configEvent,
-], function(){
-	 var states = Array.prototype.slice.call(arguments);
-	process.emit(ev_ready_main, states);
-	
-},  frdl.ready/*, false*/);		
-
-
-
-
-
-frdl.ready.deps = process.required([	
+main.frdl.ready.deps = emitter.required([	
 	                                   ev_ready_requirejs,
 	                                    configEvent,
-									    ev_ready_main, 
+									    ev_ready_co, 
 										ev_ready_jquery,
 										ev_ready_idle,
 									    ev_ready_buffer,
@@ -375,69 +385,49 @@ frdl.ready.deps = process.required([
 										], function(){	
 	 var states = Array.prototype.slice.call(arguments);
   
-	process.emit(ev_ready_deps, states);
+	emitter.emit(ev_ready_deps, states);
 	
 	
-},  frdl.ready, false);							
+},  main.frdl.ready, false);							
 		
 
 
-
-
-
-
-
-process.required([
+emitter.required([
 	configEvent,
-	ev_ready_main,
 	ev_ready_requirejs,
-	ev_defined_jquery,
+	ev_defined_jquery
 
 ], function(){
 	 var states = Array.prototype.slice.call(arguments);
 	
 	global.require(['webfan/jquery-addons'], function($){	  
-         $.lazy.loadMap( Webfan.hps.scriptengine['lazy-jquery'] );	
-		 process.emit(ev_ready_jquery_lazy, states);
+         $.lazy.loadMap( main.Webfan.hps.scriptengine['lazy-jquery'] );	
+		 emitter.emit(ev_ready_jquery_lazy, states);
     });	 
 	
 	
 	
-},  frdl.ready/*, false*/);		
-
-
-
-
-
-
+},  main.frdl.ready/*, false*/);		
 
 
    
-process.required([
+emitter.required([
 	                                 configEvent,
-	                                 ev_ready_main,
-	                                   ev_ready_jquery,
+	                                     ev_ready_jquery
 										], function(){	
 	 var states = Array.prototype.slice.call(arguments);
   
 	     global.require.s.contexts._.defined['jquery'] = global.jQuery;
          global.require.s.contexts._.defined['webfan/frdl-jQuery'] =  global.require.s.contexts._.defined['jQuery'] = global.require.s.contexts._.defined['jquery'];  	 
-         process.emit(ev_defined_jquery, global.require.s.contexts._.defined['jquery']);	
+         emitter.emit(ev_defined_jquery, global.require.s.contexts._.defined['jquery']);	
  
 
-},  frdl.ready/*, false*/);
+},  main.frdl.ready/*, false*/);
 
 
 
-
-
-
-
-
-
-process.required([	
+emitter.required([	
 	                                 configEvent,
-	                                ev_ready_main,
 	                                   ev_ready_jquery,
 	                                   ev_defined_jquery,
 	                                    
@@ -446,162 +436,79 @@ process.required([
   
 	global.require(['idle'], function(idle){	  
 	    global.jQuery.fn.idle = global.$.fn.idle = idle;			
-	    process.emit(ev_ready_idle, global.jQuery.fn.idle);	
+	    emitter.emit(ev_ready_idle, global.jQuery.fn.idle);	
     });	 
 
-},  frdl.ready/*, false*/);
+},  main.frdl.ready/*, false*/);
 
 
-
-
-
-
-
-
-
-
-	
-
-
-
-
-
-
-
-process.required([	
+emitter.required([	
 	                               configEvent,
-	                                 ev_ready_main,
 	                                   ev_ready_jquery,
-	                                   ev_defined_jquery,
+	                                   ev_defined_jquery
 	                               //   ev_ready_idle, 
 										], function(){	
 	 var states = Array.prototype.slice.call(arguments);
 
  global.require(['frdl-dom-query-old'], function(dom){
    
-   Object.defineProperty(frdl, '$j', {
+   Object.defineProperty(main.frdl, '$j', {
  	 get : function(){
 	 	return dom.$j;
 	 }
 			
    });
     
-   Object.defineProperty(frdl, 'Dom', {
+   Object.defineProperty(main.frdl, 'Dom', {
  	 get : function(){
 	 	return dom.Dom;
 	 }
 			
    });
    
-   process.emit(ev_ready_dom_query_old, dom);
+   emitter.emit(ev_ready_dom_query_old, dom);
 
  }); 
-},  frdl.ready/*, false*/);
-
-
-			
+},  main.frdl.ready/*, false*/);
 
 
 
 
-
-
-
-
-
-(function(){
- var i = 0;	
-
-	Object.defineProperty(frdl, 'state', {
-		           get : function(){
-					   if(i<MAX_DEPRECATION_WARNINGS) {
-						   console.warn('frdl.state will maybe deprecated later...,use "?"   instead!');
-					   i++;
-					   }
-					  return global.require.state;															  
-				   }
-	});
-}());	
-	
-
-
-
-
-
-
-
-
-(function(){	
+	emitter.required([
+	 configEvent,	
+	 ev_ready_requirejs,
+	 ev_ready_co
+  ], function(){		
+		
 	var _fs = false;
-//	if('undefined'===typeof global.FileError && 'undefined' !== typeof global.Error){ 
-//		global.FileError = global.Error;
-//	}
+	var _bfs = false;
+	var _Filesystem = false;	
 	
-	
-	
+	 function getFilesystem(){
+		return import('@frdl/fs');
+	 }
+		
+
 	  Object.defineProperty(main.frdl, 'fs', {
 		           get : function(){
 					   if(false === _fs){
-						 _fs = frdl.co(function*(){  						    
-							 return yield main.Filesystem;
+						 _fs = main.frdl.co(function*(){  						    
+							 return yield getFilesystem();
 						}).then(function(r){
 							 _fs = r;
 							 	 _fs.then=function(fn){		 
 									 fn(_fs);	
 								 };
+							 	 _fs.ready=function(fn){		 
+									 fn(_fs);	
+								 };
 						 });  
 					   }
 				      return _fs;  
-				   },
-		           set : function(myFs){
-					   console.warn('You SHOULD not set frdl.fs!');
-					   _fs = myFs;
 				   }
 	   });
 
 
-
-		
-		Object.defineProperty(main, 'Filesystem', {
-		           get : function(){
-					  return new Promise(function(resolve, reject){	  
-					
-	                       import('@frdl/fs')	 						
-	                      	     .then(function(fs){
-									 resolve(fs.default);
-								 });						  
-					
-					  });
-				   }
-	   });
-	
-	/*
-  process.required([
-	configEvent,
-	ev_ready_start,	
-	ev_ready_requirejs,  
- 
-  ], function(){	 
-			main.Filesystem.then(function(fs){	
-				frdl.fs = fs;
-	            process.emit(ev_ready_fs_defined, fs);
-			}).catch(function(reason){
-				frdl.alert.error(reason);
-			});		 
-		 
-  }, frdl.ready, false);
-	*/
-
-	
-	
-	process.required([
-	 configEvent,	
-	 ev_ready_requirejs, 	
-	// ev_ready_fs_defined,	
-  ], function(){	
-		
- //  global.require.s.contexts._.defined['fs'] = require('@frdl/fs');	
-	
 		
 		 if('undefined'===typeof global.require.s.contexts._.defined.fs){
 		   Object.defineProperty(global.require.s.contexts._.defined, 'fs', {
@@ -610,11 +517,8 @@ process.required([
 				   }
 	        });	 
 			 
-		 }else{
-	//		global.require.s.contexts._.defined.fs = frdl.fs; 
 		 }
-		 
-		 
+		
 		 if('undefined'===typeof global.require.s.contexts._.defined['@frdl/fs']){
 			 
 		   Object.defineProperty(global.require.s.contexts._.defined, '@frdl/fs', {
@@ -623,542 +527,90 @@ process.required([
 				   }
 	        });	 
 			 
-		 }else{
-		//	global.require.s.contexts._.defined['@frdl/fs'] = frdl.fs; 
-		 }			
- 
-		
+		 }
 			
 		if('undefined'===typeof global.require.s.contexts._.defined.filer){
 		   Object.defineProperty(global.require.s.contexts._.defined, 'filer', {
 		           get : function(){
-					//  return require('filer.js');	
 					    return require('patch-filer');	
 				   }
 	        });	 
 			 
-		 }else{
-		//	global.require.s.contexts._.defined.filer = require('filer.js'); 
-			// global.require.s.contexts._.defined.filer = require('patch-filer'); 
-		 }     
+		 }  
+		 emitter.emit(ev_ready_fs, true);
 		
-		   	
-	      process.emit(ev_ready_fs, true);
+     
 		
-   },  main.frdl.ready, false);
-	
-	
-
-	
-
-}());	
-
-
-
-
-
-
-
-
-
-(function(){
- var i = 0;	
-
-	  
-	
-	 	
-	
-
-
-	
-	 process.once(configEvent, function(Webfan){	 	 
+		
 		 
-		 
-		 
-		 
-		 if('undefined'===typeof global.require.s.contexts._.defined['@frdl/webfan']){
-			 
-		   Object.defineProperty(global.require.s.contexts._.defined, '@frdl/webfan', {
+					
+		 if('undefined'===typeof global.require.s.contexts._.defined[Symbol.for('frdlweb')]){
+		   Object.defineProperty(global.require.s.contexts._.defined, Symbol.for('frdlweb'), {
 		           get : function(){
-					  return Webfan;															  
+					  return main;															  
 				   }
 	        });	 
 			 
-		 }else{
-		//	global.require.s.contexts._.defined['@frdl/webfan'] = Webfan; 
 		 }
-		 
-		 
-		 
+		
+		 if('undefined'===typeof global.require.s.contexts._.defined[Symbol.for('frdl')]){
+		   Object.defineProperty(global.require.s.contexts._.defined, Symbol.for('frdl'), {
+		           get : function(){
+					  return main.frdl;															  
+				   }
+	        });	 
+			 
+		 }	
+		 emitter.emit(ev_ready_symbol_modules, true);	
+},  main.frdl.ready, false);
+	
+
+
+	
+ emitter.once(configEvent, function(Webfan){		 
+	 main.frdl.each(['frdlweb', 'frdl.js', main.Webfan.hps.scriptengine.webpack.main], function(name){
+		 if('undefined'===typeof global.require.s.contexts._.defined[name]){			 
+		   Object.defineProperty(global.require.s.contexts._.defined, name, {
+		           get : function(){
+					  return main;															  
+				   }
+	        });	 			 
+		 }			 
+	 });
+
+	 
+		 if('undefined'===typeof global.require.s.contexts._.defined['@frdl/webfan']){			 
+		   Object.defineProperty(global.require.s.contexts._.defined, '@frdl/webfan', {
+		           get : function(){
+					  return main.Webfan;															  
+				   }
+	        });	 			 
+		 }		 
 		 
 		 if('undefined'===typeof global.require.s.contexts._.defined['@frdl/eventemitter']){
 			 
 		   Object.defineProperty(global.require.s.contexts._.defined, '@frdl/eventemitter', {
 		           get : function(){
-					  return require('@frdl/eventemitter');															  
+					/*  return require('@frdl/eventemitter');	*/	
+					   return main.emitter.constructor ;
 				   }
 	        });	 
 			 
-		 }else{
-			global.require.s.contexts._.defined['@frdl/eventemitter'] = require('@frdl/eventemitter'); 
-		 }
-		 
+		 }	 
 		 
 		 if('undefined'===typeof global.require.s.contexts._.defined['@frdl/functions']){
 			 
 		   Object.defineProperty(global.require.s.contexts._.defined, '@frdl/functions', {
 		           get : function(){
-					  return frdl;															  
+					  return main.frdl;															  
 				   }
 	        });	 
 			 
-		 }else{
-			global.require.s.contexts._.defined['@frdl/functions'] = frdl; 
-		 }
-		 
-		 
-		 
-		 
-	 });
-}());	 
-
-
-
-(function(){
- var i = 0;	
-	Object.defineProperty(frdl, 'require', {
-		           get : function(){
-					  if(i<MAX_DEPRECATION_WARNINGS) {
-						  console.warn('frdl.require will maybe deprecated later..., use require or requirejs or require.__webpack_require__ instead!');
-					    i++;
-					  }
-					  return global.require;															  
-				   }
-	});
-}());
-
-
-(function(){
-	Object.defineProperty(frdl, 'watchFor', {
-		           get : function(){
-					  return require('watchFor');															  
-				   }
-	});
-}());
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	Object.defineProperty(frdl, 'bootAngularJs', {
-		           get : function(){
-					  return  function($element, modules, config, clear){
-						 var o=0, r;
-					     return frdl.co(function*($element, modules, config){	
-						   yield new Promise(function(resolve, reject){	 
-					          global.require(['angular-frdl'], function(angular){  
-	                              angular.element(document).ready(function () { 	
-	                               
-						    	      angular.element(function() {
-										 
-										 if(clear && !!clear){ 
-										    $($element).data('$injector', ""); 
-										 }
-										  
-                                            deferBootstrapWindowName(true);
-										  
-		  
-										  try{  
-	                                        r = angular.bootstrap($element, modules, config);
-									     }catch(e){
-												 // reject('Cannot AngularJs Bootstrap ' + modules.join(','));
-												 // return;
-										 	  }
-										  
-										  var stopper = 1;
-										  while('undefined'===typeof r && o<stopper 
-												&& !$element.hasAttribute('ng-scope')
-												&& ('undefined'===typeof $element.injector || !$element.injector())
-											   ){
-											o++;
-											  try{
-												  r = angular.bootstrap($element, modules, config);		
-												//  resolve(r);
-												//  return;
-											  }catch(e){
-												 //reject('Cannot AngularJs Bootstrap ' + modules.join(','));
-												  console.warn('Cannot AngularJs Bootstrap ' + modules.join(',') + '\n' + e);
-												  r = false;
-												  break;
-											  }
-										  } 
-										  
-										  resolve(r);
-	                                    
-										
-	                                  });  
-						          });  
-						   
-						       });  
-					      	 }).then(function(res){							  										
-							     return res;
-						      });	 
-						     
-						      return r;
-						  }, $element, modules, config);
-					  };															  
-				   }
-	});
-
-
-
-
-
-
- process.once(configEvent, function(Webfan){  	
-	 if('undefined' === typeof Webfan.hps.scriptengine.angularjs.rootSelector){				
-		 Webfan.hps.scriptengine.angularjs.rootSelector = 'body';  			
-	 }
- });	
-
-
-
-(function(main){
-  process.required([
-	  'registerComponent::after',
-	  ev_ready_angularjs_root
-  ], function(){	  
-		process.ready(function(){ 			 
-			if(null === document.querySelector('[ng-flows], [ng-flow], [ng-app], app-root') ){           
-			   main.app.boot(Webfan.hps.scriptengine.angularjs.rootSelector);			
-			}
-		});
-   },  main.frdl.ready, false); 
-}(main));
-
-
-
-
-(function(main){
-	'use strict';
+		 }		 
 	
-var Instances = {};	
-main.frdl.registerComponent=registerComponent;
-	
-//frdl.debug.default=true;
-	
-
-	
-process.required([	
-	                                  ev_ready_main,
-									    ev_ready_frdl_helper,
-	                                   ev_ready_angularjs_root,
-	                                    ev_ready_jquery,
-	                                    ev_defined_jquery, 
-	                                       ev_ready_dom_query_old,
-										], function(){	
-	 var states = Array.prototype.slice.call(arguments);
-	
-//process.ready(function(){	
-  process.emit('registerComponent::before', Instances);			
-    main.frdl.each(main.Webfan.hps.scriptengine.frdlweb.components, registerComponent);
-  process.emit('registerComponent::after', Instances);	
-  	
-//});	
-	
-	
-	
- },  main.frdl.ready, false);
-	
-	
-
-	
+ });
 
 
-function registerComponent($i, component){	
-	
-	if(null===$i || 'undefined'===typeof $i){
-	   $i = Object.keys(Instances).length;	
-	}
-	
-	 if(!!main.frdl.debug.default){	 
-		 console.log('Register component: ', component);
-	 }
-	 main.frdl.watchFor(component.selector)
-        .every(function(element){
-		  
-		/*    				
-		 var i = 0; 	 
-		 for(i=0;i<component.load.length;i++){
-			 (function(myI, i){
-			   var indexC = i;
-			   var indexI = myI;	 
-		       main.frdl.addReadyCheck(function(){
-				    return 'undefined'!==typeof  Instances[indexC][indexI];
-			   });
-			 }(i, $i));
-		 }
-		 */
-		      if('undefined'===typeof Instances[$i]){
-				 Instances[$i] = {component:component,element:element};  
-			  }
-		     if(!!main.frdl.debug.default) console.log('Invoke component: ', {component:component,element:element});
-		       main.frdl.co(function*($i, component, element){
-				  var i = 0; 
-				  for(i=0;i<component.load.length;i++){
-					  var load = component.load[i];
-					  yield new Promise(function(resolve,reject){
-					
-						     if(load.once && !!load.once && 'undefined'!==typeof Instances[$i][i]){
-								 resolve(Instances[$i][i]);
-								 return;
-							 }
-						  
-						 if('undefined'===typeof Instances[$i][i]){
-						    Instances[$i][i]=function(){
-								return Instances[$i][i];
-							};
-						 } 	
-						     switch(load.type){
-						    	 case 'html-url' :
-								 case 'append-url' :	 
-								 case 'prepend-url' :	 
-									 main.frdl.dl(main.frdl.templater(load.load, main), {	
-											 callback : function (e, r) {           
-												 if(e){
-													 reject(e);
-                                                 }else{		
-													 global.require('jquery')(element)[load.type.split(/\-/)[0]](r.data || r);
-													 resolve([]);			
-												 } 	
-											 },	
-											 always : function(){	
-	 
-											 } 	
-										 });
-									 break;	
-								 case 'html' :
-								 case 'append' :
-								 case 'prepend' :										 
-									   global.require('jquery')(element)[load.type](main.frdl.templater(load.load, main));
-									   resolve([]);
-									 break;
-								 case 'bootstrap-angular-js' : 
-								 case 'ba' :
-								 case 'ba1' :
-									 var l = [];											
-															
-									 if('string'===typeof load.load){					
-										 load.load = [load.load]; 				
-									 } 
-									 main.frdl.each(load.load, function(x, m){
-										//if('string'===typeof m){
-											l.push(main.frdl.templater(m, main)); 
-											//l.push(m); 
-										//}
-									 }); 
-									
-						             main.frdl.bootAngularJs(element, l, {}, (load.clear && !!load.clear)).then(function(r){
-										  resolve(r);
-									 }).catch(function(e){
-										reject(e); 
-									 });
-									
-									 break;
-								 case 'amd' : 
-								 case 'amd-callback' : 
-				                     
-									 if('string'===typeof load.load){					
-										 load.load = [load.load]; 				
-									 }
-				
-									
-									 var l = [];
-									 main.frdl.each(load.load, function(x, m){
-										l.push(main.frdl.templater(m, main)); 
-									 });
-									 			
-									 global.require(l, function(){						
-										 var modules = Array.prototype.slice.call(arguments);					
-										 var Module = modules[modules.length-1];						
-										 if('amd-callback' === load.type && 'function' === typeof Module){					
-											 Module.apply(element, [element, main]);						
-										 }				
-										 resolve(modules);
-										  if(!!main.frdl.debug.default) console.log('Resolved component amd-modules: ', load.load);
-									 });									 
-								 break;
-									 
-								 case 'script' :
-									 main.frdl.getScript(main.frdl.templater(load.load, main), function(element, main){
-										 resolve([]);
-										 if(!!main.frdl.debug.default) console.log('Resolved component script: ', load.load);
-									 }, true, false, [element, main]);
-								  break;
-									 
-								 case 'css' :
-								 case 'style' :
-								 case 'styles' :
-								 case 'stylesheet' :
-								 case 'stylesheets' :
-								 case 'css-link' :
-								 case 'css-import' :
-												 
-									 if('string'===typeof load.load){					
-										 load.load = [load.load]; 				
-									 }
-													
-									 var l = [], scriptsEmitter = new (require('@frdl/eventemitter')); 
-								     var scriptsState = scriptsEmitter.required(['@url_rewrite', '@scripts_fired'], function(r){
-                                           resolve([]);
-                                     },  scriptsEmitter/*, false*/);	
-									 
-									 main.frdl.each(load.load, function(x, m){
-										   var url = main.frdl.templater(m, main);
-										   l.push(url); 
-										   scriptsState.add(url);  
-									 });								 
-									 scriptsEmitter.emit('@url_rewrite', l);
-														
-									 main.frdl.each(l, function(x, url){
-										    if('css-import' === load.type){
-												main.frdl.cssImportLink(url).then(function(r){
-													scriptsEmitter.emit(url, true);
-												});
-											}else{
-												main.frdl.getCSS(url, 
-																 ('undefined'===typeof load.once || !!load.once) 
-																 ? document.querySelector('head') 
-																 : element, 
-																 ('undefined'===typeof load.once || !!load.once));
-												scriptsEmitter.emit(url, true);
-											}
-									 });	
-									 scriptsEmitter.emit('@scripts_fired', l);
-									 
-									 
-									 
-								   break;
-									 
-
-								 case 'directive' : 
-								 case 'component' :
-									 
-									 				
-									 if('string'===typeof load.load){					
-										 load.load = [load.load]; 				
-									 }
-                                     
-										
-									 var l = ['angular-frdl'];
-									 main.frdl.each(load.load, function(x, m){
-										l.push(main.frdl.templater(m, main)); 
-									 });
-									 
-									 global.require(l, function(){						
-										 var modules = Array.prototype.slice.call(arguments);					
-										 var Module = modules[modules.length-1];	
-										 var Name = main.frdl.dashToCamel(component.selector);
-										 
-										 
-																			 
-										  //   main.app.removeCloak();
-										 
-										 
-										 
-		                                 var compile = function(scope){		
-											 /*   
-											  var $injector = modules[0].injector(['ng',// 'mockApp',
-																				   main.app.root.name]);	
-											   var $compile = $injector.get("$compile");
-											   $compile(element)(scope);  
-											   scope.$digest();
-											 */
-										 modules[0].element(document).ready(function(){
-											 
-											// modules[0].element(document.querySelector(Webfan.hps.scriptengine.angularjs.rootSelector))
-											
-											    //  .injector()
-											   // .injector(modules[0].modules)
-											//  .injector([])
-											 modules[0].element(document.querySelectorAll(main.Webfan.hps.scriptengine.angularjs.rootSelector))
-												.injector().invoke([ '$compile', function($compile) {
-                                          
-												     $(element).data('$injector', ""); 
-												     var e = document.createElement('div');
-												     e.innerHTML = element.innerHTML; 
-												 
-												     $compile(e)(scope);  
-												     $(element).html($(e).html());												     
-											    	 scope.$digest();
-													/*
-												     $compile(e)($rootScope);  
-												     $(element).html($(e).html());												     
-											    	 $rootScope.$digest();		
-												  */
-												 
-                                               }]);
-											 });//angular.element(document).ready
-										 };
-										 
-										 main.app.root[load.type].apply(null,[Name,Module]);  
-										 try{
-										//    var scope = modules[0].element(element.parentNode).scope();		
-											   var scope = modules[0].element(element).scope();		
-										 }catch(e){
-											 var scope = false;
-										 }
-
-	
-								            if(true === main.app.isBooted && scope){
-												 compile(scope);
-											     resolve(modules); 
-											}else{
-												 resolve(modules); 
-											}
-										 
-										 
-											
-										 
-										     if(!!main.frdl.debug.default) console.log('Resolved component '+load.type+': ', load.load);
-								
-									 });								 
-
-									 break;
-									 
-							 }
-						  
-						 
-					  }).then(function(loaded){
-			                   if(!!main.frdl.debug.default) console.log('Resolved component load definition [#'+(i + 1).toString()+']: ', loaded);
-						       Instances[$i][i]=loaded;
-			          });
-				  }
-				 
-				   return Instances[$i];
-			  }, $i, component, element).then(function(Component){
-				//   require('@frdl/webfan').hps.scriptengine.frdlweb.components[$i]._modules = ComponentMerging;
-			       if(!!main.frdl.debug.default) console.log('Ready component: ', Component);
-			   });
-		 
-		 
-		 
-		 
-
-		 
-		    
-	 });
-}
-}(main));
 
 
 
@@ -1167,37 +619,60 @@ function registerComponent($i, component){
 	
   var _isBooted = false;
 	
+
 	
+   main.emitter.required([
+	   ev_ready_requirejs, 
+       configEvent,
+       ev_ready_watchfor,
+	   ev_ready_frdl_helper
+   ], function(){	
+	  
+ 									 main.frdl.each(main.Webfan.hps.scriptengine.angularjs.mainRequire, function(i, dependency){
+										 main.Webfan.hps.scriptengine.angularjs.mainRequire[i] = main.frdl.templater(dependency, main);
+									 });
+
+	   
+  if('angular-frdl'!==main.Webfan.hps.scriptengine.angularjs.mainRequire[0] && 'angular-frdl'!==main.Webfan.hps.scriptengine.angularjs.mainRequire[1]){
+	 main.Webfan.hps.scriptengine.angularjs.mainRequire.splice(main.Webfan.hps.scriptengine.angularjs.mainRequire.indexOf('angular-frdl'),1);  
+	 main.Webfan.hps.scriptengine.angularjs.mainRequire.unshift('angular-frdl');
+ }
+	   
+	   
+ if('url'!==main.Webfan.hps.scriptengine.angularjs.mainRequire[0]){
+	 main.Webfan.hps.scriptengine.angularjs.mainRequire.splice(main.Webfan.hps.scriptengine.angularjs.mainRequire.indexOf('url'),1);   
+	 main.Webfan.hps.scriptengine.angularjs.mainRequire.unshift('url');
+ }
+	   
+ global.require(main.Webfan.hps.scriptengine.angularjs.mainRequire, function(url, angular){
+			
+			
+
+				
 	Object.defineProperty(main, 'angular', {
 		           get : function(){
 					  return false;	                                    
 				   }	        
 	});
+	Object.defineProperty(main, 'angularjs', {
+		           get : function(){
+					  return angular;	                                    
+				   }	        
+	});	
 	
-	
-	
-   process.required([
-      configEvent,
-      ev_ready_frdl_helper
-   ], function(){	
-	   
- 									 main.frdl.each(Webfan.hps.scriptengine.angularjs.mainRequire, function(i, dependency){
-										 Webfan.hps.scriptengine.angularjs.mainRequire[i] = main.frdl.templater(dependency, main);
-									 });
-	   
-	   
-        global.require(Webfan.hps.scriptengine.angularjs.mainRequire, function(url, angular){
+			
+			
 			
 			//angular.bootstrap($element, modules, config);
 			 main.frdl.MagicHelper.addMethodCallback(angular, 'bootstrap', false, function($element, modules, config){
-				process.emit('angularjs:bootstrap', {
+				emitter.emit('angularjs:bootstrap', {
 					   element : $element,
 					   modules : modules,
 					   config : config
 				});
 			}, angular);
 			
-			
+			/*
 	       var mockApp = angular._module('mockApp', []).provider({
   
 	         	$rootElement:function() {    
@@ -1209,19 +684,16 @@ function registerComponent($i, component){
 	        });		
 			var $injector= angular.injector(['ng','mockApp']);
             var $location = $injector.get("$location");
-			
-			
-			
-						   
-						   
-						   
+			*/
+					   
+	/*					   
 angular.module('oc.lazyLoad')
  .config([ '$ocLazyLoadProvider',
   function(  $ocLazyLoadProvider) {	  
 	  								 
-									 main.frdl.each(Webfan.hps.scriptengine.lazy, function(x, m){
-										 main.frdl.each(Webfan.hps.scriptengine.lazy[x].files, function(i, f){											 
-											  Webfan.hps.scriptengine.lazy[x].files[i] = main.frdl.templater(f, main);
+									 main.frdl.each(main.Webfan.hps.scriptengine.lazy, function(x, m){
+										 main.frdl.each(main.Webfan.hps.scriptengine.lazy[x].files, function(i, f){											 
+											  main.Webfan.hps.scriptengine.lazy[x].files[i] = main.frdl.templater(f, main);
 										 });
 									 });
 	  
@@ -1234,30 +706,29 @@ angular.module('oc.lazyLoad')
         cache: true,
         rerun: false,
         reconfig: false ,                                            
-        modules: Webfan.hps.scriptengine.lazy
+        modules: main.Webfan.hps.scriptengine.lazy
     });	  
 
 }]);						   
 						   
-						   
-						   
-						   
-						   
+						 
+*/
 						   
 			main.module('app', function(plug, req){
 				
-				 									
-				                      main.frdl.each(Webfan.hps.scriptengine.angularjs.mainInject, function(i, dependency){
-										 Webfan.hps.scriptengine.angularjs.mainInject[i] = main.frdl.templater(dependency, main);
+				 						/*			
+				                      main.frdl.each(main.Webfan.hps.scriptengine.angularjs.mainInject, function(i, dependency){
+										 main.Webfan.hps.scriptengine.angularjs.mainInject[i] = main.frdl.templater(dependency, main);
 									 });
+				*/
 				
 				plug.extend({
-					 root : angular.module(MAIN, Webfan.hps.scriptengine.angularjs.mainInject),
+					 root : angular.module(main.Webfan.hps.scriptengine.webpack.main, main.Webfan.hps.scriptengine.angularjs.mainInject),
 					 angular : false,
 					 removeCloak : function(){		
-					   process.ready(function(){
+					   main.process.ready(function(){
 					    setTimeout(function(){	 
-					     process.nextTick(function(){
+					     main.process.nextTick(function(){
 						     $('[ng-cloak], .ng-cloak')			
 					          .removeAttr('ng-cloak')		
 					          .removeClass('ng-cloak')	
@@ -1276,7 +747,11 @@ angular.module('oc.lazyLoad')
 				   }
 	          });
 					
-			
+			  Object.defineProperty(main.app, 'angular', {
+		           get : function(){
+					  return false;	                                    
+				   }
+	          });			
 			
 			 Object.defineProperty(main.app, 'isBooted', {
 		           get : function(){
@@ -1287,12 +762,14 @@ angular.module('oc.lazyLoad')
 			main.module('app', function(plug, req){
 				plug.extend({
 					  boot : function(selector){
-					      if(!!_isBooted){
+					      if(true===_isBooted){
 							  return;
 						  }
 						  _isBooted = true;
-						  global.require(global.require('@frdl/webfan').hps.scriptengine.webpack.main).frdl.registerComponent(null, {			
-							  selector : selector,			
+						  
+						   main.frdl.registerComponent(null, {			
+							  selector : selector,	
+							  clear : false, 
 							  load :[ 			
 								  {				    
 									  type : 'bootstrap-angular-js',				
@@ -1370,6 +847,9 @@ angular.module('oc.lazyLoad')
 	  
 	   return service;
     }])  
+	  
+	
+	
     .config(['$httpProvider', function($httpProvider) {
         $httpProvider.interceptors.push('XFrdlRequestNegotiationInterceptor');
     }])
@@ -1382,6 +862,33 @@ angular.module('oc.lazyLoad')
 		  });
 	  }])
 	  
+	
+ .config([ '$ocLazyLoadProvider',
+  function(  $ocLazyLoadProvider) {	  
+	  								 
+									 main.frdl.each(main.Webfan.hps.scriptengine.lazy, function(x, m){
+										 main.frdl.each(main.Webfan.hps.scriptengine.lazy[x].files, function(i, f){											 
+											  main.Webfan.hps.scriptengine.lazy[x].files[i] = main.frdl.templater(f, main);
+										 });
+									 });
+	  
+
+     $ocLazyLoadProvider.config({
+        jsLoader: global.require,
+        debug: true,
+		events : true,            
+        serie: false,			
+        cache: true,
+        rerun: false,
+        reconfig: false ,                                            
+        modules: main.Webfan.hps.scriptengine.lazy
+    });	  
+
+
+  }])	  
+
+
+
 	 .run( ['$rootScope', '$state', '$stateParams', function ($rootScope, $state, $stateParams) {
               $rootScope.$state = $state;
               $rootScope.$stateParams = $stateParams; 		   
@@ -1406,16 +913,11 @@ angular.module('oc.lazyLoad')
         });
 
         $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams, options){ 
-          //  alert("root change start");
-			//console.log('toState', toState);
-			//console.log('options', options);
-			
 			plug.toState  = toState;
         });
 
         $rootScope.$on('$stateChangeError', function(event, toState, toParams, fromState, fromParams, error){ 
-          //  alert("root change error");
-			  global.require.main.frdl.alert.error(error);
+			  main.frdl.alert.error(error);
         });
     }])		
  ;
@@ -1427,13 +929,7 @@ angular.module('oc.lazyLoad')
 	  
     plug.root.config(['$stateProvider', function($stateProvider) {
        plug.$stateProvider = $stateProvider;
-/*
-		Object.defineProperty(plug, 'stateProvider', {
-		           get : function(){
-					  return $stateProvider;																  
-				   }
-		});		
-	*/	
+
 		 plug.addState = function(name, state) { 
              $stateProvider.state(name, state);
         };
@@ -1447,41 +943,25 @@ angular.module('oc.lazyLoad')
 			
 
 			
-			process.emit(ev_ready_angularjs_root, angular);				
+			main.emitter.emit(ev_ready_angularjs_root, angular);				
         });	   
    },  main.frdl.ready, false);
 }(main));
+ 
 
 
 
 
- process.once(configEvent, function(){	
-
-	Object.defineProperty(frdl, 'alert', {
-		           get : function(){
-					  return require('frdlalert');																  
-				   }
-	});
-
-  
-
-	Object.defineProperty(frdl, 'idle', {
-		           get : function(){
-					  return require('on-idle');															  
-				   }
-	});  
-	 
-	 
-	Object.defineProperty(frdl, 'version_compare', {
-		           get : function(){
-					  return require('locutus/php/info/version_compare');																  
-				   }
-	});	 
-	 
-});
-
-
-
+emitter.once(ev_ready_co, function(){
+		 function getDownloaderGetPromise(){		
+			  return new Promise(function(resolve, reject){		
+				  import('@frdl/simple-downloader')	 			
+					  .then(function(downloader){		
+					      resolve(downloader.default);		
+				  });		
+			  });	
+		  }
+	
    function download(){
 	 var Args = Array.prototype.slice.call(arguments);	
 	  if('undefined'===typeof Args[1])Args[1] = {
@@ -1489,13 +969,12 @@ angular.module('oc.lazyLoad')
 	  };
 	 var r;
 	   
-	 r = frdl.co(function*(args){   
-	    r =  yield frdl.co(function*(a){ 
+	 r = main.frdl.co(function*(args){   
+	    r =  yield main.frdl.co(function*(a){ 
 	   
 	   var p = yield new Promise(function(resolve, reject){	  
-	      import('@frdl/simple-downloader')	 						
-		     .then(function(downloadModule){
-				downloadModule.default(a[0], {	  
+	      main.downloader.then(function(downloadModule){
+				downloadModule/*.default*/(a[0], {	  
 					callback : function (e, res) {          
 						if(e){			
 							reject(e);			
@@ -1535,35 +1014,121 @@ angular.module('oc.lazyLoad')
 	   return r;
    }
 
-
-
-	Object.defineProperty(frdl, 'download', {
+	Object.defineProperty(main.frdl, 'download', {
 		           get : function(){
 					  return download;															  
 				   }
 	});  
 
-	Object.defineProperty(frdl, 'dl', {
+	Object.defineProperty(main.frdl, 'dl', {
 		           get : function(){
 					  return download;															  
 				   }
 	});  
-
-
 	Object.defineProperty(main, 'downloader', {
 		           get : function(){
+					  return getDownloaderGetPromise();
+				   }
+	});  
+	
+   emitter.emit(ev_ready_include_downloader, true);
+});
+
+
+
+
+
+emitter.required([	
+ ev_ready_requirejs,
+ ev_ready_include_downloader,	
+ ev_ready_watchfor	
+], function(){		
+	main.frdl.watchFor('html[webfan-hps-config-url]:not([frdl-processed*="webfan-hps-config-url"]),'					   
+					   +' html[requirejs-config-url]:not([frdl-processed*="requirejs-config-url"])'					  
+					  ).every(function(el){
+	var loadDefaultConfig = true, _a =  ' webfan-hps-config-url requirejs-config-url ';
+	var a = (el.hasAttribute('frdl-processed')) ? el.getAttribute('frdl-processed') + _a : _a;  
+	el.setAttribute('frdl-processed', _a);
+	
+		
+		
+	var loadFn = function(attributeName, configProcessor){
+		  var configurl = main.frdl.templater(el.getAttribute(attributeName), main),
+			  eventName = 'ready:config:url:'+configurl,
+			  moRes = false;
+		   main.frdl.ready.readyMain.add(eventName);
+		
+		   main.frdl.dl(configurl, {
+			   callback : function (e, r) {  										
+				   if(e){										
+					   console.error(e);                                          
+				   }else{														
+					  try{ 
+					   var v = r.data || r;
+						  var c = JSON.parse(v);
+						  moRes = configProcessor(c);
+					  }catch(e2){
+						console.error(e2); 
+					  }
+				   } 												
+			   },										
+			   always : function(){		 
+				 emitter.emit(eventName, moRes);						
+			   } 											
+		});		
+	};
+		
+		if(el.hasAttribute('webfan-hps-config-url')){
+			loadFn('webfan-hps-config-url', main.Webfan.config);
+		}
+		
+		if(el.hasAttribute('requirejs-config-url')){
+			loadFn('requirejs-config-url', global.require.config);
+		}
+		
+});	
+},  main.frdl.ready, false);
+	 Object.defineProperty(main.frdl, 'searching', {
+		           get : function(){
 					  return new Promise(function(resolve, reject){	  
-	                       import('@frdl/simple-downloader')	 						
-	                      	     .then(function(downloader){
-									 resolve(downloader.default);
+	                       import('searching')	 						
+	                      	     .then(function(searching){
+									 resolve(searching.default);
 								 });						  
 					  });
 				   }
-	});  
+	});
+	 Object.defineProperty(main.frdl, 'finder', {
+		           get : function(){
+					  return main.frdl.searching;
+				   }
+	});
 
+	 Object.defineProperty(main.frdl, 'sort', {
+		           get : function(){
+					  return new Promise(function(resolve, reject){	  
+	                       import('@frdl/sort')	 						
+	                      	     .then(function(sort){
+									 resolve(sort.default);
+								 });						  
+					  });
+				   }
+	});
 
+	 Object.defineProperty(main, 'subarg', {
+		           get : function(){
+					  return new Promise(function(resolve, reject){	  
+	                       import('subarg')	 						
+	                      	     .then(function(subarg){
+									 resolve(subarg.default);
+								 });						  
+					  });
+				   }
+	});
+	
 
-	Object.defineProperty(main, 'axios', {
+ 
+	 Object.defineProperty(main, 'axios', {
 		           get : function(){
 					  return new Promise(function(resolve, reject){	  
 	                       import('axios')	 						
@@ -1572,9 +1137,7 @@ angular.module('oc.lazyLoad')
 								 });						  
 					  });
 				   }
-	});  
-
-
+	}); 
 	Object.defineProperty(main, 'jszip', {
 		           get : function(){
 					  return new Promise(function(resolve, reject){	  
@@ -1585,17 +1148,6 @@ angular.module('oc.lazyLoad')
 					  });
 				   }
 	});  
-
-	Object.defineProperty(main, 'uglify', {
-		           get : function(){
-					 return new Promise(function(resolve, reject){	    
-					      global.require(['uglify'], function(UglifyJS){		 
-									 resolve(UglifyJS);
-	    			      });
-					 });   
-				   }
-	});  
-
 	Object.defineProperty(main, 'phpParser', {
 		           get : function(){
 					  return new Promise(function(resolve, reject){	  
@@ -1606,7 +1158,6 @@ angular.module('oc.lazyLoad')
 					  });
 				   }
 	});  
-
 	Object.defineProperty(main, 'phpFunctions', {
 		           get : function(){
 					  return new Promise(function(resolve, reject){	  
@@ -1617,132 +1168,241 @@ angular.module('oc.lazyLoad')
 					  });
 				   }
 	});
-	/**/
-// global.jQuery = require('jquery');	
-// global.$ = global.jQuery;	
-     	
+	Object.defineProperty(main, 'dnsOverHttps', {
+		           get : function(){
+					  return new Promise(function(resolve, reject){	 						  
+	                       import('dohjs-frdl')	 						
+	                      	     .then(function(dohjs){
+									 resolve(dohjs.default);
+								 });							
+
+					  });
+				   }
+	});  
+	Object.defineProperty(main, 'api', {
+		           get : function(){
+					  return new Promise(function(resolve, reject){	  
+	                       import('@frdl/frdlweb-api-helper')	 						
+	                      	     .then(function(apiHelper){
+									 resolve(apiHelper.default);
+								 });						  
+					  });
+				   }
+	});
+	Object.defineProperty(main.frdl, 'queryString', {
+		           get : function(){
+					  return new Promise(function(resolve, reject){	  
+	                       import('query-string')	 						
+	                      	     .then(function(queryString){
+									 resolve(queryString.default);
+								 });						  
+					  });
+				   }
+	});
+
+	 //vcards-js : https://github.com/enesser/vCards-js/tree/v2.10.0
+	 //'vcf : https://github.com/jhermsmeier/node-vcf#format-vcf
+	 	Object.defineProperty(main, 'vcard', {
+		           get : function(){
+					  return new Promise(function(resolve, reject){	  
+						  Promise.all([ 							  
+						   new Promise(function(resolveV1, rejectV1){	  
+							  import('vcards-js').then(function(vcards){
+									 resolveV1(vcards.default);
+							   });
+						  }),
+						   new Promise(function(resolveV2, rejectV2){
+								  import('vcf').then(function(vcf){
+									 resolveV2(vcf.default);
+							   });								  
+							})
+						  ])
+						   .then(function(vcfApis){							      
+									 resolve({
+									     FileHelper : vcfApis[0],
+										 JSONHelper : vcfApis[1]
+									 });
+							 });						  
+					  });
+				   }
+	});
 
 
 
+emitter.once(ev_ready_start, function(){
+	
+	Object.defineProperty(main.frdl, 'co', {
+		           get : function(){					 					     
+					  return require('co');	                                    
+				   }	        
+	});
+	emitter.emit(ev_ready_co, true);
+	
+		
+	if('undefined' === typeof Webfan.hps.scriptengine.angularjs.rootSelector){				
+		 Webfan.hps.scriptengine.angularjs.rootSelector = 'body:not([frdl-angularjs-bootstrap*="prepared"])';  			
+	 }  
+	
+    global.Buffer = require('buffer/').Buffer;   
+    emitter.emit(ev_ready_buffer, global.Buffer);	
 
-
-//  frdl.ready.deps.add('ready:inline-worker');	
-  process.once(configEvent, function(Webfan){
-  	 require('@frdl/helper')(frdl)
-			 .then(function(yes){
-					process.emit(ev_ready_frdl_helper, frdl);
-		 
-						global.require(['inline-worker'], function(InlineWorker){
-						      frdl.InlineWorker = function(func, varsObject) {
-
-								
-							 	 var FunctionName = frdl.Reflector.getFunctionName( func );
-                                 var FunctionBody = frdl.Reflector.getFunctionBody( func );
-                                 var FunctionParameters = frdl.Reflector.getFunctionParameters( func );
-                                 var func =
-									 'function ' + FunctionName + '(' + FunctionParameters.join(',') + ')'
-                                           +   '{'
-                                           +      frdl.strpp(FunctionBody, varsObject)
-                                           + '}';
-								  return new InlineWorker(func, global);								 
-							  };
-							
-							
-							  process.emit(ev_ready_inline_worker, frdl.InlineWorker);
-						
-							
-	                        
-						});
-                            					   
-	           });
-  });
-
-
-
-              (function(frdl){
-                            function WORKER_ENABLED() {
-                                return !!(global === global.window && global.URL && global.Blob && global.Worker);
-                            }
- 
-                            function InlineWorker(func, self, varsObject) {
-                                var _this = this;
-                                var functionBody = func.toString().trim().match(/^function\s*\w*\s*\([\w\s,]*\)\s*{([\w\W]*?)}$/)[1];
-                                self = self || global;
-								
-								var tplVars = varsObject || global;
-								functionBody = (function(templateString, templateVars){                     
-									return new Function("return `"+templateString +"`;").call(templateVars);                    
-								}(functionBody, tplVars));
-									
-                                if (WORKER_ENABLED()) {
-                                    return new global.Worker(global.URL.createObjectURL(new global.Blob([functionBody], {
-                                        type: "text/javascript"
-                                    })));
-                                }
-
-								throw new Error('Worker ist not enabled!');
-								
-                                function postMessage(data) {
-                                    process.nextTick(function() {
-                                        _this.onmessage(JSON.stringify({
-                                            data: data
-                                        }));
-                                    });
-                                }
-                                this.self = self;
-                                this.self.postMessage = postMessage;
-                                process.nextTick(function() {func.bind(self, self); });
-                            }
-                            InlineWorker.prototype.postMessage = function postMessage(data) {
-                                var _this = this;
-                               process.nextTick(function() {
-                                    _this.self.onmessage(JSON.stringify({
-                                        data: data
-                                    }));
-                                });
-                            };
-    
-                            frdl.InlineWorker0 = InlineWorker;  
-				          
-			  }(frdl));	
-
-
- 
-// frdl.ready.deps.add('ready:buffer');	
- process.once(configEvent, function(Webfan){
-  global.require(['buffer'], function(Buffer){
-	 global.Buffer = Buffer;
-	 process.emit(ev_ready_buffer, Buffer);	  
-  });	
- });	
-
-
-
-
-
-
-
-process.required([	
-	                                  ev_ready_requirejs,
-	                    
-										], function(){		
+   import('webfan/frdlweb-part/include-lazy-main-members')
+     .then(function(members){	
+	    members.default(main, emitter);
+        emitter.emit(ev_ready_include_lazy_members, true);
+	    emitter.emit('ready:frdlweb-components', true);
+   });	
+	
+});//once ev_ready_start
+	
+main.frdl.ready.readyMain = emitter.required([
+	ev_ready_requirejs,
+	configEvent,
+	ev_ready_co, 
+	ev_ready_symbol_modules,									   
+	ev_ready_inline_worker,								
+	ev_ready_frdl_helper,	                                  
+	ev_ready_jquery_lazy,								
+	ev_ready_idle,							
+	ev_ready_buffer,
+	ev_ready_include_lazy_members
+], function(){
 	// var states = Array.prototype.slice.call(arguments);
-	
-  global.require(Webfan.hps.scriptengine.webpack.main)
-   .frdl
-   .getScript(__CONFIG_MAIN_NEXT_BUNDLE_FILENAME__, function(){
-	   process.emit(configEvent, Webfan );
-   }, true, false);
-	
+	  main.emitter.emit(ev_ready_main, true);
+},  main.frdl.ready/*, false*/);		
+
+
+
+ main.frdl.ready.angularBootDependencies = emitter.required([
+	  configEvent,
+	  'registerComponent::after',
+	  ev_ready_angularjs_root,
+	  ev_ready_include_lazy_members,	
+	  ev_ready_jquery_lazy,
+	 ev_ready_main	
+  ], function(){	  
+		main.process.ready(function(){ 			 
+			if(null === document.querySelector('[ng-flows], [ng-flow], [ng-app], app-root, [frdl-angularjs-bootstrap*="prepared"]') ){           
+			   main.app.boot(main.Webfan.hps.scriptengine.angularjs.rootSelector);			
+			}
+		});
+   },  main.frdl.ready, false); 
+
+
+  main.emitter.required([	 
+	  ev_ready_frdl_helper,	      
+	  'ready:frdlweb-components',
+      ev_ready_co, 
+	  ev_ready_include_downloader,
+	  ev_ready_include_lazy_members,	  
+	  configEvent,
+	  ev_ready_angularjs_root,
+	  ev_ready_jquery_lazy
+  ], function(){	
+	// var states = Array.prototype.slice.call(arguments);
+		
+  main.emitter.emit('registerComponent::before', main.frdl.registerComponentInstances);			
+    main.frdl.each(main.Webfan.hps.scriptengine.frdlweb.components, main.frdl.registerComponent);
+  main.emitter.emit('registerComponent::after', main.frdl.registerComponentInstances);	
 	
  },  main.frdl.ready, false);
 
 
+emitter.required([	
+ ev_ready_requirejs,
+ ev_ready_watchfor
+], function(){		
+	
+main.frdl.watchFor('head:not([frdl-processed*="init-config"]').every(function(el){
+	var loadDefaultConfig = true, _a =  ' init-config ';
+	var a = (el.hasAttribute('frdl-processed')) ? el.getAttribute('frdl-processed') + _a : _a;  
+	el.setAttribute('frdl-processed', _a);
+	
+   if(el.hasAttribute('frdlweb-options')){
+		if(false !==main.frdl.strpos(el.getAttribute('frdlweb-options'), '--no-defaults') ){
+			loadDefaultConfig = false;
+		}
+	}	
+
+  if(true === loadDefaultConfig){	
+   main.frdl.getScript(__CONFIG_MAIN_NEXT_BUNDLE_FILENAME__, function(){
+	   emitter.emit(configEvent, main.Webfan );
+   }, true, false);
+  }else{
+	   emitter.emit(configEvent, false );
+  }
+	
+});	
+	
+},  main.frdl.ready, false);
+
+
+
+(function(main, helper){
+ function loadWorker(main, emitter){
+	global.require(['inline-worker'], function(InlineWorker){
+						      main.frdl.InlineWorker = function(func, varsObject) {								
+							 	 var FunctionName = main.frdl.Reflector.getFunctionName( func );
+                                 var FunctionBody = main.frdl.Reflector.getFunctionBody( func );
+                                 var FunctionParameters = main.frdl.Reflector.getFunctionParameters( func );
+                                 var func =
+									 'function ' + FunctionName + '(' + FunctionParameters.join(',') + ')'
+                                           +   '{'
+                                         //  +      main.frdl.strpp(FunctionBody, varsObject)
+								           +      main.frdl.interpolate(FunctionBody, varsObject)
+                                           + '}';
+								  return new InlineWorker(func, global);								 
+							  };		
+							
+		 emitter.emit(ev_ready_inline_worker, main.frdl.InlineWorker);                        
+	}); 
+ }
+	
+  	 helper(main.frdl, main.emitter, main)
+			 .then(function(yes){
+					main.emitter.emit(ev_ready_frdl_helper, main.frdl);	 		 
+		              if('undefined'!==typeof main.emitter.ready && 'undefined'!==typeof main.emitter.ready.readyMain && true === main.emitter.ready.readyMain.stateReady(configEvent) ){
+						  loadWorker(main, main.emitter);
+					  }else{
+						  main.emitter.once(configEvent, function(Webfan){
+							  loadWorker(main, main.emitter);
+						  });
+					  }     
+	 });
+}(main, require('@frdl/helper')));
 
 
 
 
+(function(main, __webpack_require__, loadJQUery, loadRequireJs){	
+   main.frdl.__webpack_require__ = __webpack_require__;	
+  
+  main.emitter.once(ev_ready_requirejs, function(){ 	
+   main.emitter.emit(ev_ready_start, true);
+ });	
+	
+   loadRequireJs(main, __webpack_require__);	
 
-
-
-start(process, main, global);
+	 if('undefined'!==typeof global && 'undefined'!==typeof global.jQuery && 'undefined'!==typeof global.$ && global.$ === global.jQuery){  
+		 main.emitter.emit(ev_ready_jquery, global.jQuery); 
+	 }else{ 
+		 loadJQUery(main);
+	 }	
+}(
+  main,	
+  __webpack_require__,
+  function(main){
+        import('jquery')
+	       .then(function(jquery){
+	           global.jQuery = global.$  = jquery.default;
+	           main.emitter.emit(ev_ready_jquery, global.jQuery);
+       });		
+},
+ function(main, __webpack_require__){ 
+  import('patch-require')
+	  .then(function(patch){	     
+          patch.default(main);
+	      global.require.__webpack_require__ = __webpack_require__;
+	      main.emitter.emit(ev_ready_requirejs, global.require);
+  });	
+}));

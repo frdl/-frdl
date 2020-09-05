@@ -1,20 +1,49 @@
 
+var path = require('path');
+
+var MainThreaded = require(path.resolve(__dirname, '../index.js'));
+
+
 if(typeof define !== 'function'){ 
   define = (require('amdefine'))(module); 
 }
 
 define( ['try-require', 'co',  'co-prompt',  'axios', 'subarg', 'commander', 'path', 'clone', './tokenize.js'
 
-, 'fs'], 
+, 'fs' , 'debug'], 
 	   function( tryRequire,  co, prompt, axios, subarg, program, path , clone, tokenize
 	 
-	   , fs){
+	   , fs, debug){
  'use strict'; 
  
 
 var shell = tryRequire("shelljs");
 
 var errors = [];
+
+
+
+debug.enable(module.name);
+//var Console = debug(module.name + ':*');
+var Console = debug(module.name + '@'+__filename);
+Console.error = console.error.bind(console);
+// by default stderr is used
+//error('goes to stderr!');
+ 
+
+// set this namespace to log via console.log
+Console.log = console.log.bind(console); // don't forget to bind to console!
+//log('goes to stdout');
+//error('still goes to stderr!');
+ 
+// set all output to go via console.info
+// overrides all per-namespace log settings
+Console.info = console.info.bind(console);
+Console.warn = console.warn.bind(console);
+Console.trace = console.trace.bind(console);
+Console.debug = console.debug.bind(console);
+
+
 
 const packageFile = 'package.json';	
 
@@ -57,14 +86,15 @@ return new Promise(function(resolve, reject){
  });	
 };	
 	
-	
+/*	
 Frdlweb.prototype.npmInit=function(){
  var THAT =  this;
  if(false === THAT.pkg){
     shell.exec('npm init -y');
  }
 };
-	
+*/
+
 Frdlweb.prototype.readPackageFile=function(){	
 var THAT =  this;
 return new Promise(function(resolve, reject){
@@ -90,6 +120,7 @@ return new Promise(function(resolve, reject){
   .description('frdl command line tool (`frdl` ist the base-command)')
   .command('boilerplate [templates]', 'build selected default components')
   .command('bundlejs [entry]', 'build javascript bundle(s)')  
+  .command('install-remote-files [dir]', '(Pre-)install required files from remote urls')  
   
   .command('test [url]', 'test toc URL')
 

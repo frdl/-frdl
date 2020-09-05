@@ -1,4 +1,4 @@
-
+/*
 (function() {
     var childProcess = require("child_process");
     var oldSpawn = childProcess.spawn;
@@ -11,3 +11,5 @@
     childProcess.spawn = mySpawn;
 })();
 
+*/
+console.log(__filename + ' was hit @todo');

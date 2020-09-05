@@ -1,3 +1,7 @@
 #! /usr/bin/env node
+
+var cachepath = '/../cache/downloaded-remote-modules';
+require('path').dirname( require.resolve(__dirname + '/../')) +  cachepath;
+
 exports = module.exports =
-  require('./frdlweb').F(process.argv, process.stdout);
+  require('frdl/bin/frdlweb').F(process.argv, process.stdout);

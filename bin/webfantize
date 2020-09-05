@@ -1,0 +1,91 @@
+#! /usr/bin/env node
+
+	  var frdl = require('@frdl/functions');
+      var amdefine = require('amdefine');
+      var define = amdefine(module); 
+ 
+ const requireFromWeb = require('require-from-web');
+ 
+
+ var helper = require("@frdl/frdlweb-api-helper");
+
+
+
+
+define( [ 'try-require',  'co',  'co-prompt',  'axios', 'subarg', 'commander', 'clone'], function( tryRequire, co,prompt, axios, subarg, program, clone ){
+ 'use strict';
+	
+	
+var shell = tryRequire("shelljs");
+
+function FF(file){
+  console.log(file);	
+}
+	
+	
+program
+   
+   .usage('frdl webfantize <directory> [options] \n\tRewrite project(files) to make it `frdlweb`-compliant.\n\tRegister Workspace: \n\t\thttps://frdl.webfan.de/?op=webaccount&task=new_blog#new_blog'
+		 + '\n\tDownload UI: \n\t\tPhp-Installer: https://webfan.de/install/php/ ')
+	.arguments('webfantize [[directory]]')
+
+
+	.option('-f, --flavor [flavor]', '"Building flavor" - the identifier of one subordinate of 1.3.6.1.4.1.37553.8.1.8.8.11.* or compliant')
+	.option('-w, --write', 'Save the new contents to composer.json/project directory')
+ 
+  .action(function(directory) {
+ 
+     if(!directory){
+	    var directory = process.cwd();
+	 }
+ 
+       
+   try{
+	    var pkg = require(directory + '/composer.json');
+	  }catch(e){
+	     console.error(e);
+		 program.exit(e);
+	  }	  
+	  	  
+	var flavor = program.flavor || false;
+	if(false===flavor && 'undefined'!==typeof pkg.extra 
+	&& 'undefined'!==typeof pkg.extra.frdl 
+	&& 'undefined'!==typeof pkg.extra.frdl.webfantize
+	&& 'undefined'!==typeof pkg.extra.frdl.webfantize.flavor){
+	   flavor = pkg.extra.frdl.webfantize.flavor;
+	}
+	
+	if(false===flavor){
+	  console.warn('No etxtra.webfantize.flavor present in composer.json -> defaults to frdl-project');
+	   flavor = 'frdl-project';
+	}
+
+
+	if(program.write){
+	   helper.webfantize.webfantize(flavor, pkg)
+		   .then(function(result){
+			  require('fs').writeFile( directory + '/composer.json', result, function(e){
+				   if(e){
+				    	program.exit(e);   
+				   }else{
+					   program.exit(0);
+				   }
+	         });
+		 });
+	}//programm.write
+	
+	
+  });//action
+	
+
+if('undefined'===typeof shell){
+ 	
+}else{
+   program.parse(process.argv);
+}
+
+
+ 
+	
+ return program;
+});

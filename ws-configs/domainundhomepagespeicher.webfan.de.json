@@ -2,7 +2,7 @@
         "ui": {
             "tinymce": {
                 "defaults": {
-                    "baseURL": "\/cdn\/application\/webfan\/node_modules\/tinymce",
+                    "baseURL": "https:\/\/domainundhomepagespeicher.webfan.de\/cdn\/application\/webfan\/node_modules\/tinymce",
                     "valid_elements": "*[*]"
                 }
             }
@@ -17,7 +17,7 @@
             },
             "scriptengine": {
                 "urls": {
-                    "baseUrl": "\/cdn\/application\/webfan\/node_modules\/",
+                    "baseUrl": "https:\/\/domainundhomepagespeicher.webfan.de\/cdn\/application\/webfan\/node_modules\/",
                     "library": "\/cdn\/application\/webfan\/node_modules\/webfan\/homepagesystem.app",
                     "library_require": "webfan\/homepagesystem.app",
                     "node_modules": "\/cdn\/application\/webfan\/node_modules\/"
@@ -25,12 +25,12 @@
                 "hash": "166.465551.fd950be43aaf844dd517e686dd75284e3e01ac95",
                 "build": "34012cad-8ccf-45fb-c837-0164d33f2378",
                 "server": {
-                    "DNS": ["de", "domainundhomepagespeicher"],
+                    "DNS": ["de", "webfan", "domainundhomepagespeicher"],
                     "tld": "de",
-                    "domain": "domainundhomepagespeicher.de",
-                    "subdomain": "",
-                    "host": "domainundhomepagespeicher.de",
-                    "port": "80",
+                    "domain": "webfan.de",
+                    "subdomain": "domainundhomepagespeicher",
+                    "host": "domainundhomepagespeicher.webfan.de",
+                    "port": "443",
                     "canonical": "domainundhomepagespeicher.de",
                     "ssl": "1"
                 },

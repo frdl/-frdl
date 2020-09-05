@@ -1,6 +1,8 @@
 #! /usr/bin/env node
 
 
+var lib =  require('frdl/assets/node_modules/generate-guid-simple'); 
+
  var amdefine = require('amdefine');
  var define = amdefine(module); 
 
@@ -51,7 +53,7 @@ program
 		program.base,
 		program.assets, 
 		process.cwd(),
-		'config.main.'+((new Date()).getTime())+'.next-bundle.js',
+		'config.main.'+lib.frdl.guid + '-' +((new Date()).getTime())+'.next-bundle.js',
 		'https:',
 		program.modules || project.modules_dirname || 'modules', 
 		program.defaults

@@ -1,71 +1,74 @@
+ 
+ 'use strict';
+
+function sanitize(o){
+ return JSON.parse(JSON.stringify(o));	
+}
+
 var co = require('co');
 var prompt = require('co-prompt');
 var shell = require("shelljs");
 
 //var browserify = require('browserify');
-var debug = require('debug');
+
 var fs = require('fs');
 var recursive = require("recursive-readdir");
 var CP = (/win/i.test(process.platform)) ? 'copy' : 'cp';
 
 var UglifyJS = require("uglify-js");
 
-var pkg = require('./package.json');
-require("@frdl/node-browser-shim")(global);
-
-//var Webfan = require('./../frdl@webfan');
-var Webfan = require('@frdl/webfan');
-//var fixture = require('./patch-fixes-browser');
-//fixture(Webfan);
-//console.log(Webfan.module);
-
-
-
+var pkg = require('frdl/package.json');
+	
 var download = require('@frdl/simple-downloader');
- //if ('undefined' === typeof global.define){
-	// define = global.define =  require('amdefine');		
-// }
-var {extend, clone, sanitize, each, extractTextBetween, mt_rand, preg_quote, str_replace, urlencode} = require('@frdl/functions');
 
-//var sort = require('@frdl/sort');	
-//console.log(extend);
-//console.log(clone);
+var {extend, clone, each, extractTextBetween, mt_rand, preg_quote, str_replace, urlencode} = require('@frdl/functions');
+
+
+var lib =  require('frdl/assets/node_modules/generate-guid-simple'); 
 
 const path = require('path');
 const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin'); 
-//const webpackRequireHttp = require('webpack-require-http');
-//const DownloadWebpackPlugin = require('remote-webpack-plugin');
-const SaveRemoteFilePlugin = require('save-remote-file-webpack-plugin');
-//const DynamicCdnWebpackPlugin = require('dynamic-cdn-webpack-plugin');
+
+
+
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const requirejsPlugin = require('requirejs-webpack-plugin');
 const BabelMinifyPlugin = require('babel-minify-webpack-plugin');
-//const NpmInstallPlugin = require('npm-install-webpack-plugin');
-//var converter = require('requirejs-to-webpack-cli');
-const WebpackPwaManifest = require('webpack-pwa-manifest');
 const InjectPlugin = require('webpack-inject-plugin').default;
- //const CleanWebpackPlugin = require('clean-webpack-plugin');
- //const NodeSecurityPlugin = require('webpack-nodesecurity-plugin');
-const WebpackShellPlugin = require('webpack-shell-plugin');
+var webpackRequireHttp = require('webpack-require-http');
 
 
 
 function configWebfanLoader(config) {
+
   return (err, content) => {
 	  if(err){
 		 console.error(err);  
 		 return;
 	  }
-	// console.log('content', content); 
-	//  delete config.hps.scriptengine.requirejs;
-	 delete config.hps.scriptengine.webpack.predefine;
+	var k;		  
+
+	
+	// delete config.hps.scriptengine.webpack.predefine;
 	  
-     return "(function(){require('@frdl/webfan').config(\n/*! @@_BEGIN_CONFIG_@@ */\n"+ JSON.stringify(sanitize(config))+"\n/*! @@_END_CONFIG_@@ */\n);}());"
-	   //  + "require.config(require('@frdl/webfan').hps.scriptengine.requirejs);console.log('requirejs configured');"
-	   //   + "console.log(__webpack_chunkname__);console.log(__webpack_hash__);"
-	   // + 'require("@frdl/node-browser-shim")(undefined);'
-	  ; 
+	           for(k in config.hps.scriptengine.requirejs.paths){
+				  if(/\$/.test(k)){
+					  delete config.hps.scriptengine.requirejs.paths[k];	
+				  }
+			   }
+	  
+	/*  */
+	  var d = new Date();
+        var datestr = d.toDateString() + ' ' + d.toTimeString() ;
+      
+	  var versionstr =
+		  datestr.replace(/([\w]+\s[\w]+\s[\d]+\s[\d]+\s[\d]{1,2}\:[\d]{1,2}\:[\d]{1,2})\sGMT\+[\d]+\s\([^\)]+\)/
+						  , "\"hash.build.ws:"+ config.hps.scriptengine.hash + "\" \"date:$1\"");	  
+	  
+	   config.hps.scriptengine.build = '"product:[@frdl/frdljs](https://www.npmjs.com/package/frdl)" "version:'+ config.hps.scriptengine.frdlweb.version+'"' + ' ' + versionstr;	 	  
+	  
+   //  return "(function(){require('@frdl/webfan').config(/*! @@_BEGIN_CONFIG_@@ */"+ JSON.stringify(config) +"/*! @@_END_CONFIG_@@ */);}());"; 
+	  return "(function(){require('@frdl/webfan').config("+ JSON.stringify(config) +");}());"; 
   };
 }	
 
@@ -78,7 +81,8 @@ class WebfanInjectConfigPlugin {
   }
 
   apply(compiler) {
-    new InjectPlugin(this.loader(this.config), {					
+    new InjectPlugin(this.loader(this.config), {
+		             loaderID : lib.frdl.guid,
 					 entryName: this.entry,         //  Limit the injected code to only the entry w/ this name   
 					// entryOrder: // ENTRY_ORDER.First    //  Make the injected code be the first entry point           
 					 //  ENTRY_ORDER.Last     //  Make the injected code be the last entry point             
@@ -105,11 +109,7 @@ __CONFIG_MAIN_NEXT_BUNDLE_FILENAME__,
 __PROTOCOL__,
  __MODULES_DIR__,
  __DEFAULTS__
- 
 ){
-
-
-
 
 co(function*(__ENTRY__,
 __MAIN__,			  
@@ -141,7 +141,8 @@ __PROTOCOL__,
 //debug.log = console.info.bind(console);
 //error('now goes to stdout via console.info');
 //log('still goes to stdout, but via console.info now');
-
+var debug = require('debug');
+var check, p;
 var writer, msg;
 //debug.enable(module.name);
 debug.enable(module.name);
@@ -167,8 +168,16 @@ Console.trace = console.trace.bind(console);
 Console.debug = console.debug.bind(console);
 
 //console = global.console = Console;	
-	
-var k, l, WebfanConfig ={};
+
+var lib =  require('frdl/assets/node_modules/generate-guid-simple'); 
+/**/
+//var main = require("frdl/assets/node_modules/frdl-library-main")('frdlweb');
+//var WebfanConfig =require('@frdl/webfan');
+var WebfanConfig =lib.Webfan;
+
+
+//var k, l, WebfanConfig =main.Webfan;
+var k, l;	
 var i  =0, url, m, y;	
 var pwaManifest = false;	
 	
@@ -176,8 +185,9 @@ var pwaManifest = false;
 
 var __PROJECT_DIR__ = 	__PROJECT_DIR__ || process.cwd();
 var __CONFIG__ = __CONFIG__ || 'config'	
-var __CONFIG_MAIN_NEXT_BUNDLE_FILENAME__ = __CONFIG_MAIN_NEXT_BUNDLE_FILENAME__ ||'config.main.'+mt_rand(1000,9999)+'.next-bundle.js';
-var __DIST__ = __DIST__ ||'app';
+//var __CONFIG_MAIN_NEXT_BUNDLE_FILENAME__ = __CONFIG_MAIN_NEXT_BUNDLE_FILENAME__ ||'config.main.'+lib.frdl.mt_rand(100000,9999999)+'.next-bundle.js';
+var __CONFIG_MAIN_NEXT_BUNDLE_FILENAME__ = __CONFIG_MAIN_NEXT_BUNDLE_FILENAME__ ||'config.main.'+lib.frdl.guid+'.next-bundle.js';
+var __DIST__ = __DIST__ ||'dist/app';
 var __PUBLIC_PATH__ = __PUBLIC_PATH__ || '';
 var __ASSETS__ = __ASSETS__ || __PROJECT_DIR__+'/assets/';
 var __HOST__ = __HOST__ ||'domainundhomepagespeicher.webfan.de';
@@ -194,8 +204,7 @@ var __CONFIG_MAIN_NEXT_BUNDLE_CONTENT_1__	= '';
 var __MODULES_DIR__ = __MODULES_DIR__ || 'modules';
 
 var __DEFAULTS__ = __DEFAULTS__ || false;	
-//__CONFIG_MAIN_NEXT_BUNDLE_FILENAME__ = WebfanConfig.hps.scriptengine.webpack.__PUBLIC_PATH__ + __CONFIG_MAIN_NEXT_BUNDLE_FILENAME__;
-	
+
 	
 	if(__PROJECT_DIR__ === __dirname 
 	//   && 'root' !== process.env.USER && undefined !== process.env.USER
@@ -212,39 +221,73 @@ var __DEFAULTS__ = __DEFAULTS__ || false;
 	}
 	
 
- 
-  //   shell.exec("rm -r " + path.resolve(__PROJECT_DIR__, __DIST__) + ' || true');
-	// shell.exec("mkdir " + __PROJECT_DIR__ + '/assets/');
+
+    // console.log('Assets path: ' + __ASSETS__);
 	
-	//shell.exec("rm -rf " +__PROJECT_DIR__ + '/assets/');
+	
+ //  shell.exec("rm -rf " +path.resolve(__PROJECT_DIR__, 'assets'));
+
+  p=__ASSETS__;
+  check = fs.existsSync(p);	
+  if(true===check || 'object'===typeof check){
+	// shell.exec('mkdir -p '+p+' --mode=0755');
+	  shell.exec("rm -rf " +p);
+  }
+/* */
+
+	 
      shell.exec(CP+' -rf '+__dirname+'/assets/. '+__PROJECT_DIR__ + '/assets/');
+
 	
-	
-// shell.exec('cd ' + __dirname + ' && npm run yarn && cd ' + __PROJECT_DIR__);
 
-    
-  //   shell.exec("rm -r " + path.resolve(__PROJECT_DIR__, 'assets/frdl-legacy-app.js')  + ' || true');
+  p=path.resolve(__PROJECT_DIR__, __DIST__);
+  check = fs.existsSync(p);	
+  if(true===check || 'object'===typeof check){
+	// shell.exec('mkdir -p '+p+' --mode=0755');
+	   shell.exec("rm -rf " +p);
+  }
 
-/*
-var b = browserify();
-b.add(__ASSETS__+__ENTRY__);
-//b.transform('deamdify');
-b.bundle()
-	//.pipe(process.stdout)
-   .pipe(fs.createWriteStream('dist/bundle-test.js'))
-;
+  p=path.resolve(__PROJECT_DIR__, 'themes');
+  check = fs.existsSync(p);	
+  if(true!==check && 'object'!==typeof check){
+	 shell.exec('mkdir -p '+p+' --mode=0755');
+  }
 
-
+	/*
+yield new Promise(function(resolve,reject){ 
+	setTimeout(function(){
+		resolve(true);
+	}, 2500);
+});
 */
-//define = global.define =  require('amdefine');	
 
-//define =  require('amdefine');	
+p=path.resolve(__PROJECT_DIR__, __DIST__);
+  check = fs.existsSync(p);	
+  if(true!==check && 'object'!==typeof check){	
+    shell.exec('mkdir -p '+p+' --mode=0775');
+  }
+	
+var FrdlProjectJsonFile = path.resolve(__PROJECT_DIR__, 'frdl.project.json');
+try{
+	var FrdlProjectJson = require(FrdlProjectJsonFile);
+	var FrdlThemeObject = FrdlProjectJson.config.theme;
+}catch(e){
+	var FrdlProjectJson = false;
+	var FrdlThemeObject = false;
+}
+
+	
 
 
 
+if(false !== FrdlProjectJson && 'undefined'!==typeof FrdlProjectJson.modules_dirname){
+	__MODULES_DIR__ = FrdlProjectJson.modules_dirname;
+}
+	
 
 
-var config = require('./ws-configs/' + 'domainundhomepagespeicher.webfan.de' + '.json');
+
+var config = require('frdl/ws-configs/' + 'domainundhomepagespeicher.webfan.de' + '.json');
 
   url = __PROTOCOL__+'//'+__HOST__+config.hps.scriptengine.urls.library + '?version='+(new Date()).getFullYear()+'.'+(((new Date()).getMonth())+1)+'.'+(new Date()).getDay();
  var libraryContentLegacy = false;	
@@ -280,69 +323,16 @@ var config = require('./ws-configs/' + 'domainundhomepagespeicher.webfan.de' + '
 	
 		 }catch(e2){	
 			msg='Cannot get configuration information from "'+url+'"!\nExample: '+__PROTOCOL__+'//frdl.webfan.de'+config.hps.scriptengine.urls.library;
-		    console.error(msg);	
-            process.exit(msg);	
+		    console.warn(msg);	
+           // process.exit(msg);	
+			//  config = require('frdl/ws-configs/' + 'domainundhomepagespeicher.webfan.de' + '.json');
 		}
 	}
 	}		
-	// console.log('config: ', config);		
 
- //console.log(config);	
-	
- // writer = fs.createWriteStream( __ASSETS__ +'frdl-legacy.js');
 
 	
-
-    var _codeLegacy = extractTextBetween(libraryContentLegacy, 
-			 'webfan/hps-features-implementation */\n/*! https://github.com/jensarps/AMD-feature/blob/master/examples/targets/dynamic.js*/', 
-			 '/*! @@_BEGIN_RUN_@@ */')
-		
-         + extractTextBetween(libraryContentLegacy, 
-			 '/*! @@_BEGIN_HPS_MODULES_@@ */', 
-			 '/*! @@_END_HPS_MODULES_@@ */');
-				
-	//var codeLegacy = UglifyJS.minify(_codeLegacy,  { 
-					//toplevel: false,   
-					//compress: {       
-						//global_defs: {    
-			                   //"@console.log": "alert"      
-						//}//,      
-					//	passes: 2   
-				//	},   
-					//output: {   
-					//	beautify: false
-					//}
-			//	});		
-
-	// var codeLegacyJS = codeLegacy.code;
-
-  yield new Promise(function(resolve,reject){ 
-	   fs.writeFile( __ASSETS__ +'frdl-legacy-app.'+ config.hps.scriptengine.hash +'.js',
-					_codeLegacy
-					, function(e){
-				   if(e){
-					reject(e);   
-				   }else{
-					   resolve(true);
-				   }
-	  });
-  });
-
-
-
-
-
-//var reqConf =  converter.convert(config);
-Webfan.config(config);
-
-for(l in Webfan){
- if('object'===typeof Webfan[l]){	
-  WebfanConfig[l] = Webfan[l];
-  for(k in Webfan[l]){
-	WebfanConfig[l][k] = Webfan[l][k];
-  }
- }	 
-}	
+WebfanConfig.config(config);
 
 WebfanConfig.hps.scriptengine.webpack = WebfanConfig.hps.scriptengine.webpack || {
 	__CONFIG__ : __CONFIG__,
@@ -355,459 +345,111 @@ WebfanConfig.hps.scriptengine.webpack = WebfanConfig.hps.scriptengine.webpack ||
 	predefine : {
 		umd : [],
 		amdRaw : [
-		  'angular-frdl',
+		  'angular-frdl-part-1',
+		  'angular-frdl-part-2',
+		  'angular-frdl'
 		],
 		amd : [
 		    'amd-loader/frdlweb/amd-loader',
 		    'amd-loader',
 			'webfan/load-js',			
-			'util',
-			'url',
-			'path',			
 			'ieee754',			
 			'base64-js',
-			'buffer',
 			'querystring',			
 			'idle',	
-			'inline-worker',
+			'util',
+			'url',
+			'path',
+		    'requireRemoteModulePromise',
+		    'inline-worker'
 		]
 	},
-	
+	automaticNameDelimiter : '~',
 	OVERWRITE_LEGACY : false
 };
 
-//WebfanConfig.hps.scriptengine.requirejs.prefix = 'webfan/load-js';
-//WebfanConfig.hps.scriptengine.requirejs.defaultPrefix = 'webfan/load-js';
 	
 WebfanConfig.hps.scriptengine.requirejs.prefix = '';
 WebfanConfig.hps.scriptengine.requirejs.defaultPrefix = '';
 	
 WebfanConfig.hps.scriptengine.frdlweb = {
-	version : pkg.version,
-	components : {}
+	version : pkg.version
 };
-
-
-	
-	
 	
 
+WebfanConfig.hps.scriptengine.requirejs.shim = extend(WebfanConfig.hps.scriptengine.requirejs.shim, {		   
+	      process: '@frdl/process'
 
-WebfanConfig.hps.scriptengine.angularjs = WebfanConfig.hps.scriptengine.angularjs || {};	
-WebfanConfig.hps.scriptengine.angularjs.rootSelector = WebfanConfig.hps.scriptengine.angularjs.rootSelector || 'body';	
-WebfanConfig.hps.scriptengine.angularjs.mainRequire = WebfanConfig.hps.scriptengine.angularjs.mainRequire || [
-	'url', 'angular-frdl'
+});
+
+
+
+
+WebfanConfig.hps.scriptengine.angularjs = {};	
+WebfanConfig.hps.scriptengine.angularjs.rootSelector = 'body';	
+WebfanConfig.hps.scriptengine.angularjs.mainRequire =[
+	'url',
+	'angular-frdl'
 ];
-WebfanConfig.hps.scriptengine.angularjs.mainInject = WebfanConfig.hps.scriptengine.angularjs.mainInject || [
-		'csrf-cross-domain',                     	  
-		'ui.router', 	                         
+WebfanConfig.hps.scriptengine.angularjs.mainInject = [
+		'csrf-cross-domain',                     
 		'oc.lazyLoad',							
-		'$frdlProvider',	                          
-		'$WebfanProvider',							
-		'frdl.prototype.Pathprovider',				
-		'frdl.prototype.gui',					
-		'ngTouch'			
+        '@frdl/frdl/angularjs',					
+		'ngTouch',			                   	  
+		'ui.router'
 	];
 
 
-	
-if(__DEFAULTS__){
-	
-WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('literalizer');		
-	
-	
+if(__DEFAULTS__){	
 WebfanConfig.hps.scriptengine.webpack.predefine.amdRaw.push('angular-ui-bootstrap/angular-ui-bootstrap');		
 WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('bootstrap-4/js/bootstrap-bundle');		
 WebfanConfig.hps.scriptengine.angularjs.mainRequire.push('bootstrap-4/js/bootstrap-bundle');	
 WebfanConfig.hps.scriptengine.angularjs.mainRequire.push('angular-ui-bootstrap/angular-ui-bootstrap');
 WebfanConfig.hps.scriptengine.angularjs.mainInject.push('ui.bootstrap');		
+}
 	
 WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('ng-sanitize');	
 WebfanConfig.hps.scriptengine.angularjs.mainRequire.push('ng-sanitize');
 WebfanConfig.hps.scriptengine.angularjs.mainInject.push('ngSanitize');		
 		
-	
+if(__DEFAULTS__){	
 WebfanConfig.hps.scriptengine.angularjs.mainRequire.push('angular-messages/angular-messages');
 	
 WebfanConfig.hps.scriptengine.angularjs.mainRequire.push('angular-xeditable/angular-xeditable');	
-WebfanConfig.hps.scriptengine.angularjs.mainInject.push('xeditable');	
+WebfanConfig.hps.scriptengine.angularjs.mainInject.push('xeditable');
 	
-	
-	
-
-WebfanConfig.hps.scriptengine.angularjs.mainInject.push('ui.select');
-
-	
-	
+WebfanConfig.hps.scriptengine.angularjs.mainInject.push('ui.select');	
 	
 WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('webfan/navigator/json-rpc-worker');
 WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('Webfan.hps.rpc');
 WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('Webfan.hps.Router');	
 	
-	
-	
 WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('webfan/webfanURLParser');
 WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('dom-legacy');
 WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('frdl-dom-query-old');
-WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('webfan/jquery-addons');
-		
-	
-		 
+WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('webfan/jquery-addons');		 
 	
 WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('frdlweb.rpc');
-WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('JsonRpcClient');	
+WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('JsonRpcClient');		
+}	
 	
+		
 	//'webfan/hps/dsgvo-cookiechoices'
 WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('webfan/hps/dsgvo-cookiechoices');		
 WebfanConfig.hps.scriptengine.webpack.predefine.amd.push('dsgvo-adsense');	
 	
 		
-//WebfanConfig.hps.scriptengine.webpack.predefine.amdRaw.push('angular-frdl');	
+if('undefined'===typeof WebfanConfig.hps.scriptengine.lazy){
+  WebfanConfig.hps.scriptengine.lazy = [];	
+}
 
-
-WebfanConfig.hps.scriptengine.lazy.push({
-  name : 'mgo-angular-wizard',
-  files : ['angular-wizard/dist/frdl-wizard',
-		  '${this.Webfan.hps.scriptengine.requirejs.baseUrl}angular-wizard/dist/angular-wizard.css']	
-});	
-
-WebfanConfig.hps.scriptengine.lazy.push({
-  name : __MAIN__ + '.install',
-  files : ['webfan/install/setup',
-
-		     '${this.Webfan.hps.scriptengine.requirejs.baseUrl}angular-wizard/dist/angular-wizard.css',		       
-		  ]	
-});	
+if(__DEFAULTS__){
+ var lazyModules = 	require('frdl/frdlweb-lazy-modules');
+ lib.frdl.each(lazyModules, function(i,m){
+	 WebfanConfig.hps.scriptengine.lazy.push(m);
+ });
 	
-WebfanConfig.hps.scriptengine.lazy.push({
-  name : 'angular-resizable',
-  files : ['angular-resizable/angular-resizable',
-		  '${this.Webfan.hps.scriptengine.requirejs.baseUrl}angular-resizable/angular-resizable.css']	
-});	
-	
-
-WebfanConfig.hps.scriptengine.lazy.push({
-  name : 'frdlweb-whois',
-  files : ['whois/frdlweb-whois',
-		   
-		 ]	
-});	
-	
-
-WebfanConfig.hps.scriptengine.lazy.push({
-  name : 'frdlweb-whois2',
-  files : ['whois/frdlweb-whois2',
-		   
-		 ]	
-});	
-	
-	
-/*
-  <link rel=stylesheet href="../doc/docs.css">
-
-  <link rel="stylesheet" href="../lib/codemirror.css">
-  <link rel="stylesheet" href="../addon/hint/show-hint.css">
-  <script src="../lib/codemirror.js"></script>
-  <script src="../addon/hint/show-hint.js"></script>
-  <script src="../addon/hint/xml-hint.js"></script>
-  <script src="../addon/hint/html-hint.js"></script>
-  <script src="../mode/xml/xml.js"></script>
-  <script src="../mode/javascript/javascript.js"></script>
-  <script src="../mode/css/css.js"></script>
-  <script src="../mode/htmlmixed/htmlmixed.js"></script>
-  */
-WebfanConfig.hps.scriptengine.lazy.push({
-  name : 'codemirror-ui',
-  files : [
-	  '${this.Webfan.hps.scriptengine.requirejs.baseUrl}codemirror/lib/codemirror.css',
-	  '${this.Webfan.hps.scriptengine.requirejs.baseUrl}codemirror/addon/hint/show-hint.css',
-	  
-	  
-	  "codemirror/lib/codemirror",
-	  "codemirror/addon/hint/show-hint",
-	  "codemirror/addon/hint/xml-hint",
-	  "codemirror/addon/hint/html-hint",
-	  "codemirror/mode/xml/xml",
-	  "codemirror/mode/javascript/javascript",
-	  "codemirror/mode/css/css",
-	  "codemirror/mode/htmlmixed/htmlmixed",
-
-	  
-	  'codemirror-ui/codemirror-module',
-		   
-		 
-  ]	
-});	
-	
-	
-	
-WebfanConfig.hps.scriptengine.frdlweb.components.webfanDefaultCss = 
-{	
-   selector : 'head',
-	load : [
-
-	{
-	  type : 'css-link',
-	  once : true,		
-	  load : [		
-		'${this.Webfan.hps.scriptengine.requirejs.baseUrl}webfan/navigator/webfan-default.css',
-		//'${this.Webfan.hps.scriptengine.requirejs.baseUrl}bootstrap-4/css/bootstrap-min.css',  
-	  ]
-	},
-   ]
-	
-};	
-	
-
-WebfanConfig.hps.scriptengine.frdlweb.components.intent = 
-{	
-   selector : 'intent, [frdl-intents-load]',
-	load : [
-		{
-            type : 'script',
-			once : true,
-			load : 'https://frdl.webfan.de/cdn/frdl/flow/components/frdl/intent/webintents.js'
-	},		
-
-
-   ]
-		
-};
-
-
-	
-WebfanConfig.hps.scriptengine.frdlweb.components.legacy = 
-{	
-  // selector : 'ng-flows:not([ng-bootstrapped]), ng-flow:not([ng-bootstrapped]), ng-app:not([ng-bootstrapped]), '
-	selector : 'ng-flows:not([ng-bootstrapped]), ng-flow:not([ng-bootstrapped]), '
-		+ 'webfa-nav:not([ng-bootstrapped]), webfan-widget:not([data-frdl-component-initiated="true"]), '
-		+ 'webfan[type="widget"]:not([data-frdl-component-initiated-rewrite-_canonical_2_*="true"]), '
-		+ '*[type^="application/vnd.frdl.flow.widget."]:not([data-frdl-component-initiated-rewrite-_canonical_2_*="true"]), '
-		+ '*[type$=".wgt"]:not([data-frdl-component-initiated-rewrite-_canonical_2_*="true"]), '
-		+ '*[data-frdl-component*=":"]:not([data-frdl-component-initiated-rewrite-_canonical_="true"]):not([data-frdl-component-initiated])',
-	load : [
-		{
-			type : 'script',
-			once : true,
-			load : '${this.Webfan.hps.scriptengine.webpack.__PUBLIC_PATH__}frdl-legacy-app.${this.Webfan.hps.scriptengine.hash}.js'
-		},
-	
-		{
-	  type : 'amd',
-	  once : true,		
-	  load : [		
-	//     'webfan/lang-legacy', 
-		 'webfan/navigator/webfan-widget',
-		 'webfan/navigator/webfan-nav',
-		 'webfan/navigator/ui', 
-		// 'webfan/load-js!${this.Webfan.hps.scriptengine.webpack.__PUBLIC_PATH__}frdl-legacy-component.${this.Webfan.hps.scriptengine.hash}.js', 
-	  ]
-	},		
-		
-		
-		{
-	  type : 'amd-callback',
-	  once : true,		
-	  load : [		
-	//	'webfan/load-js!${this.Webfan.hps.scriptengine.webpack.__PUBLIC_PATH__}frdl-legacy-component.${this.Webfan.hps.scriptengine.hash}.js?t=${this.Webfan.hps.scriptengine.webpack.hash}',
-		'${this.Webfan.hps.scriptengine.webpack.__PUBLIC_PATH__}frdl-legacy-component.${this.Webfan.hps.scriptengine.hash}.js?t=${this.Webfan.hps.scriptengine.webpack.hash}',
-	  ]
-	},
-		
-
-   ]
-	
-};
-
-	
-
-
-
-WebfanConfig.hps.scriptengine.frdlweb.components.uiSwitch = 
-{	
-   selector : 'switch-button',
-	load : [
-		{
-	  type : 'directive',
-	  once : true,		
-	  load : [	  
-		'angular-ui-switch/frdlweb.directive.angular-ui-switch', 		
-	  ]
-	},		
-		
-		
-	{
-	  type : 'css-link',
-	  once : true,		
-	  load : [		
-		'${this.Webfan.hps.scriptengine.requirejs.baseUrl}angular-ui-switch/angular-ui-switch.css',
-	  ]
-	},
-   ]
-	
-};
-	
-/*
-WebfanConfig.hps.scriptengine.frdlweb.components.webfanModel = 
-{	
-   selector : 'webfan-model',
-	load : [
-		
-
-		{
-	  type : 'directive',
-	  once : true,		
-	  load : [	  
-		'webfan-model', 		
-	  ]
-	},		
-		
-		
-	
-   ]
-	
-};	
-
-*/
-	
-
-WebfanConfig.hps.scriptengine.frdlweb.components.hamburgerButton = 
-{	
-   selector : 'hamburger-button',
-	load : [
-		
-
-		{
-	  type : 'directive',
-	  once : true,		
-	  load : [	  
-		'frdlweb.directive.hamburger-button', 		
-	  ]
-	},		
-		
-		
-	
-   ]
-	
-};
-
-
-	
-
-
-
-
-
-	
-WebfanConfig.hps.scriptengine.frdlweb.components.uiSelectCss = 
-{	
-   selector : 'ui-select',
-	load : [
-
-	{
-	  type : 'css-link',
-	  once : true,		
-	  load : [		
-		'${this.Webfan.hps.scriptengine.requirejs.baseUrl}angular-ui-select/ui-select.css',
-	  ]
-	},
-   ]
-	
-};	
-	
-WebfanConfig.hps.scriptengine.frdlweb.components.downloaderDirective = 
-{	
-   selector : 'downloader',
-	load : [
-		
-
-		{
-	  type : 'directive',
-	  once : true,		
-	  load : [	  
-		'angular-downloader', 		
-	  ]
-	},		
-		
-		
-	
-   ]
-	
-};
-	
-
-	
-	
-	
-
-
-
-	
-WebfanConfig.hps.scriptengine.frdlweb.components.legacyTranslate = 
-{	
-   selector : '[name="frdl.inX.dictonary-file"]',
-	load : [
-		{
-	  type : 'amd',
-	  once : true,		
-	  load : [	
-	//     'webfan/navigator/ui', 
-	     'webfan/lang-legacy', 
-		]
-	},		
-
-
-   ]
-		
-};
-	
-
-
-	
-WebfanConfig.hps.scriptengine.frdlweb.components.dsgvoAdsense = 
-{	
-   selector : 'dsgvo-adsense',
-	load : [
-
-		
-		
-		{
-	  type : 'amd-callback',
-	  once : true,		
-	  load : [		
-	//	'${this.Webfan.hps.scriptengine.webpack.__PUBLIC_PATH__}dsgvo-adsense.${this.Webfan.hps.scriptengine.hash}.js?t=${this.Webfan.hps.scriptengine.webpack.hash}',
-		  'dsgvo-adsense',
-	  ]
-	},
-		
-
-   ]
-	
-};
-	
-	
-
-
-
-
-/* use instead: frdlweb.app.boot('html')
-WebfanConfig.hps.scriptengine.frdlweb.components.ngMainApp = 
-{	
-   selector : 'html',
-	load : [
-	{	
-		      clear: false,
-	          once : true,			
-		      type : 'bootstrap-angular-js',	
-			  load :	[WebfanConfig.hps.scriptengine.webpack.main]
-				
-	},	
-	
-   ]
-	
-};
-*/
-
+ WebfanConfig.hps.scriptengine.frdlweb.components = require('frdl/frdlweb-components');
 }//__DEFAULTS__
 	
 
@@ -817,73 +459,82 @@ delete WebfanConfig.hps.scriptengine.requirejs.map;
 	
 WebfanConfig.hps.scriptengine.requirejs.paths['com.webfan.gui'] = 'webfan/navigator/ui'; 
 
-WebfanConfig.hps.scriptengine.requirejs.paths.lit = 'literalizer'; 
-	// WebfanConfig.hps.scriptengine.webpack.__ENTRY__.split(/\.js/)[0];
+//WebfanConfig.hps.scriptengine.requirejs.paths.lit = 'literalizer'; 
 
 
 
-__CONFIG_MAIN_NEXT_BUNDLE_CONTENT_1__	 
-	             += "define('Webfan', function(){return require('@frdl/webfan');});"
-				  + "define('process', function(){return global.process;});"
+__CONFIG_MAIN_NEXT_BUNDLE_CONTENT_1__ += ""
 	
-                
 
-
-				
+	              + "define('Webfan', function(){return require('@frdl/webfan');});"
+				  + "define('process', function(){return require('@frdl/process');});"
 				  + "define('fs', function(){return require('@frdl/fs');});"
 				  + "define('vm', function(){return require('" + WebfanConfig.hps.scriptengine.webpack.main + "').vm;});"
-				 // + "define('@frdl/vm', function(){return require('" + WebfanConfig.hps.scriptengine.webpack.main + "').vm;});"
+				  + "define('@frdl/vm', function(){return require('" + WebfanConfig.hps.scriptengine.webpack.main + "').vm;});"
 				  + "define('webfan/vm', function(){return require('" + WebfanConfig.hps.scriptengine.webpack.main + "').vm;});"
-				
-		
-				
-
-		
-
+				  + "define('extend', function(){return require.main.frdl.extend;});"
+				  + "define('clone', function(){return require.main.frdl.clone;});"	
+				  + "define('base64_encode', function(){return require.main.frdl.base64_encode;});"
+				  + "define('base64_decode', function(){return require.main.frdl.base64_decode;});"
+				  + "define('base64_detect', function(){return require.main.frdl.base64_detect;});"
+				  + "define('str_replace', function(){return require.main.frdl.str_replace;});"
+				  + "define('explode', function(){return require.main.frdl.explode;});"
 	
-				  + "define('extend', function(){return require('" + WebfanConfig.hps.scriptengine.webpack.main + "').frdl.extend;});"
-				  + "define('clone', function(){return require('" + WebfanConfig.hps.scriptengine.webpack.main + "').frdl.clone;});"	
-				  + "define('base64_encode', function(){return require('" + WebfanConfig.hps.scriptengine.webpack.main + "').frdl.base64_encode;});"
-				  + "define('base64_decode', function(){return require('" + WebfanConfig.hps.scriptengine.webpack.main + "').frdl.base64_decode;});"
-				  + "define('base64_detect', function(){return require('" + WebfanConfig.hps.scriptengine.webpack.main + "').frdl.base64_detect;});"
-				  + "define('str_replace', function(){return require('" + WebfanConfig.hps.scriptengine.webpack.main + "').frdl.str_replace;});"
-				  + "define('explode', function(){return require('" + WebfanConfig.hps.scriptengine.webpack.main + "').frdl.explode;});"
-	
-
-			//	  + "define('angular-frdl', function(){return require('" + WebfanConfig.hps.scriptengine.webpack.main + "').angular;});"
-				//  + "define('angular', ['angular-frdl'], function(){return angular;});"
-			//	  + "define('angularjs', ['angular-frdl'], function(){return angular;});"
 	
 				  + "define('EventEmitter', function(){return require('@frdl/eventemitter');});"
 				  + "define('eventemitter', function(){return require('@frdl/eventemitter');});"
 	
-
-			//	  + "define('ngAppModule', ['webfan/navigator/ng-app-module'], function(ngAppModule){	return ngAppModule;});"
-			//	  + "define('ng-app-module', ['webfan/navigator/ng-app-module'], function(ngAppModule){	return ngAppModule;});"
+			//	  + "define('lit', ['literalizer'], function(literalizer){return literalizer;});"
 	
-	          //    + "define('filer', function(){return require('@frdl/fs').filer;});"
+				  + "define('webfan/navigator/simpledialog-9x', function(){return require.main.frdl.alert;});"
+	              + "define('webfan/navigator/simpledialog-9x.js', function(){return require.main.frdl.alert;});"
 	
-
-				  + "define('lit', ['literalizer'], function(literalizer){return literalizer;});"
-	
-				  + "define('webfan/navigator/simpledialog-9x', function(){return require('" + WebfanConfig.hps.scriptengine.webpack.main + "').frdl.alert;});"
-	              + "define('webfan/navigator/simpledialog-9x.js', function(){return require('" + WebfanConfig.hps.scriptengine.webpack.main + "').frdl.alert;});"
-	
-				  + "define('webfan/navigator/dom-observer-new', function(){return require('" + WebfanConfig.hps.scriptengine.webpack.main + "').frdl.watchFor;});"
-	              + "define('webfan/navigator/dom-observer-new.js', function(){return require('" + WebfanConfig.hps.scriptengine.webpack.main + "').frdl.watchFor;});"
+				  + "define('webfan/navigator/dom-observer-new', function(){return require.main.frdl.watchFor;});"
+	              + "define('webfan/navigator/dom-observer-new.js', function(){return require.main.frdl.watchFor;});"
 
 ;
-//webfan/navigator/simpledialog-9x.js
-//'webfan/navigator/dom-observer-new'	
-	
-	
-	
+		
 
 	
+ p = path.resolve(__PROJECT_DIR__, 'frdl-extensions');	
+ check = fs.existsSync(p);		
+//	console.log(p);
+//	console.log(check);
+	
+if(true===check || 'object'===typeof check){
+yield new Promise(function(resolve,reject){ 
+  recursive(path.resolve(__PROJECT_DIR__, 'frdl-extensions'), ["!webfan.js"], function (err, files) {
+	   if(err){
+		   console.warn(err);
+		   reject(err);
+		   return;
+	   }
+	   var file, i=0;
+	   for(i=0; i<files.length;i++){
+		   file = files[i];
+		   require(file)(WebfanConfig);
+		   console.log('Config Module File %s', file);
+		   
+	   }
+	  resolve(files);
+  });
 
+});	
+}
+
+
+p=path.resolve(__PROJECT_DIR__, __MODULES_DIR__);
+ check = fs.existsSync(p);	
+		//console.log(p);
+	//console.log(check);
+if(true===check || 'object'===typeof check){
 yield new Promise(function(resolve,reject){ 
   recursive(path.resolve(__PROJECT_DIR__, __MODULES_DIR__), ["!webfan.js"], function (err, files) {
-   // console.log(files);
+	   if(err){
+		   console.warn(err);
+		   reject(err);
+		   return;
+	   }
 	   var file, i=0;
 	   for(i=0; i<files.length;i++){
 		   file = files[i];
@@ -895,34 +546,37 @@ yield new Promise(function(resolve,reject){
   });
 
 });	
+}
 
-
-
-/*
-yield new Promise(function(resolve,reject){ 
-  recursive(path.resolve(__PROJECT_DIR__, 'node_modules'), ["!webfan.js"], function (err, files) {
-	  if(err || 'undefined' === typeof files){
-		return;  
-	  }
-   // console.log(files);
+if(false !== FrdlThemeObject){
+	p=path.resolve(__PROJECT_DIR__, 'themes/'+FrdlThemeObject.vendor+'/'+FrdlThemeObject.name);
+ check = fs.existsSync(p);	
+ 	//	console.log(p);
+	//console.log(check);
+ 
+ if(true===check || 'object'===typeof check){	 
+    yield new Promise(function(resolve,reject){ 
+       recursive(path.resolve(__PROJECT_DIR__, 'themes/'+FrdlThemeObject.vendor+'/'+FrdlThemeObject.name), ["!webfan.js"], function (err, files) {
+	   if(err){
+		   console.warn(err);
+		   reject(err);
+		   return;
+	   }		   
 	   var file, i=0;
 	   for(i=0; i<files.length;i++){
 		   file = files[i];
 		   require(file)(WebfanConfig);
-		   console.log('Config Module File %s', file);
+		   console.log('Config Theme File %s', file);
 		   
 	   }
 	  resolve(files);
-  });
+    });
 
-});	
-	
-*/	
-	
-//WebfanConfig.hps.scriptengine.webpack.predefine.amd = sort(WebfanConfig.hps.scriptengine.webpack.predefine.amd);
+  });	
+ }
+}
 
-
-
+//}());
 
 
 
@@ -1006,7 +660,7 @@ yield new Promise(function(resolve,reject){
 
 
 	
-
+/*
    y = yield new Promise(function(done,rejected){
 	  fs.readdir( __ASSETS__ , function(e, dir){
 		  if(e){
@@ -1024,42 +678,19 @@ yield new Promise(function(resolve,reject){
 		  }
 	   });	  
 	});
-   fs.chmodSync( __ASSETS__ , 0o744); 
-	
+   fs.chmodSync( __ASSETS__ , 0o744); 	
 
-	
-
-/*
-
-   y = yield new Promise(function(done,rejected){
-	  fs.readdir( __DIST__ , function(e, dir){
-		  if(e){
-		    fs.mkdir( __DIST__ , function(err, d){
-			   if(err){
-				  rejected(err);
-				  //  console.warn(err);
-				    // done(d);
-			   }else{
-				   done(d);
-			   }
-		    });
-		  }else{
-			  done(true);
-		  }
-	   });	  
-	});
-   fs.chmodSync( __DIST__ , 0o744); 
-	*/
+*/
 	
 
 
 
 
 
-	//\/cdn\/frdl\/flow\/components\/webfan\/install\/icon128.png
+
  
 	url = __PROTOCOL__+'//'+__HOST__+'/cdn/frdl/flow/components/webfan/install/icon128.png';
-    writer = fs.createWriteStream(__ASSETS__ +'icon128.png');
+    writer = fs.createWriteStream(path.resolve(__PROJECT_DIR__,  __DIST__ +'/icon128.png'));
   
 	yield new Promise(function(resolve,reject){
 	
@@ -1091,8 +722,8 @@ yield new Promise(function(resolve,reject){
 
 	
    
-	url = __PROTOCOL__+'//'+__HOST__+'/favicon.ico';
-	writer = fs.createWriteStream( __ASSETS__ +'favicon.ico');
+	url = __PROTOCOL__+'//'+__HOST__+'/favicon.ico.php';
+	writer = fs.createWriteStream(path.resolve(__PROJECT_DIR__,  __DIST__ +'/favicon.ico'));
 	
   yield new Promise(function(resolve,reject){ 
 	
@@ -1103,8 +734,8 @@ yield new Promise(function(resolve,reject){
 	  callback : function (e, r) {
              if(e){
 				// throw e;
-				 console.error(e);
-				 process.exit(1);
+				 console.warn(e);
+				// process.exit(1);
 			 }else{
 				 (r.data || r).pipe(writer);
 				 writer.on('finish', resolve);
@@ -1123,8 +754,7 @@ yield new Promise(function(resolve,reject){
 
 	try{
 	url = __PROTOCOL__+'//'+__HOST__+'/show_user_picture.php?pic=logo';
-	//url = __PROTOCOL__+'//'+__HOST__+'/logo.jpg';
-	writer = fs.createWriteStream( __ASSETS__ +'logo.jpg');
+	writer = fs.createWriteStream(path.resolve(__PROJECT_DIR__,  __DIST__ +'/logo.jpg'));
 	var logoFound = false;
   yield new Promise(function(resolve,reject){ 
 	
@@ -1135,8 +765,8 @@ yield new Promise(function(resolve,reject){
 	  callback : function (e, r) {
              if(e){
 				// throw e;
-				 console.error(e);
-				 process.exit(1);
+				 console.warn(e);
+				// process.exit(1);
 			 }else{
 				 (r.data || r).pipe(writer);
 				 writer.on('finish', resolve);
@@ -1161,138 +791,73 @@ yield new Promise(function(resolve,reject){
 	}
 	
 	
-/*
- if(false===logoFound){
-    url = __PROTOCOL__+'//'+__HOST__+'/show_user_picture.php?pic=logo';
-	writer = fs.createWriteStream( __ASSETS__ +'logo.jpg');
 
-  yield new Promise(function(resolve,reject){ 
-	
-	download(url, {
-	  params : {	
-	    responseType: 'stream'
-	  },
-	  callback : function (e, r) {
-             if(e){
-				// throw e;
-				 console.error(e);
-				 process.exit(1);
-			 }else{
-				 (r.data || r).pipe(writer);
-				 writer.on('finish', resolve);
-                 writer.on('error', reject);
-			 }
- 	 },
-	  always : function(){
-		 if('undefined'!==process.env.DEBUG && false !== process.env.DEBUG){
-		   console.log('Requested: ', url);		 
-		 }
-	  } 
-	});
-  });		
- }
-	
-
-
-	
-	url = __PROTOCOL__+'//'+__HOST__+'/favicon.ico';
-	writer = fs.createWriteStream( __ASSETS__ +'favicon.ico');
-	
-  yield new Promise(function(resolve,reject){ 
-	
-	download(url, {
-	  params : {	
-	    responseType: 'stream'
-	  },
-	  callback : function (e, r) {
-             if(e){
-				// throw e;
-				 console.error(e);
-				 process.exit(1);
-			 }else{
-				 (r.data || r).pipe(writer);
-				 writer.on('finish', resolve);
-                 writer.on('error', reject);
-			 }
- 	 },
-	  always : function(){
-		 if('undefined'!==process.env.DEBUG && false !== process.env.DEBUG){
-		   console.log('Requested: ', url);		 
-		 }
-	  } 
-	});
-  });
-*/	 
  	
 	
-	// console.log('pwaManifest', pwaManifest); 
 	
-//Webfan.hps.scriptengine.requirejs.paths.Webfan = '@frdl/webfan';
-//WebfanConfig.hps.scriptengine.requirejs.paths.vm = '@frdl/vm'; 	
-//WebfanConfig.hps.scriptengine.requirejs.paths['webfan/vm'] = '@frdl/vm'; 	
-
-WebfanConfig.hps.scriptengine.requirejs.shim = extend(WebfanConfig.hps.scriptengine.requirejs.shim, {		   
-	      process: '@frdl/process', 
-     //   vm: '@frdl/vm',
-	  //  url : 'url',
-	  //  path : 'path',
-	//	fs : '@frdl/fs',
-	  //  'jQuery' : 'webfan/frdl-jQuery',
-	  //   'jQuery' : 'jquery',
-	 //   __requirejs__loaded_module__ : "@frdl/requirejs"
-});
 
 var O = {
 	path : path.resolve(__PROJECT_DIR__, __DIST__), //path.resolve(__dirname, __DIST__), 
 	alias : extend(sanitize(WebfanConfig.hps.scriptengine.requirejs.paths), {
-        
-	    process: '@frdl/process', 
-        vm: '@frdl/vm',
-		'filer.js' : 'patch-filer',
-		fs : '@frdl/fs',
-		'@frdl/functions' : path.dirname(require.resolve('@frdl/functions')),
-		'@frdl/vm' : path.dirname(require.resolve('@frdl/vm')),
-		'@frdl/webfan' : path.dirname(require.resolve('@frdl/webfan')),
+        'angular' : 'angular-frdl', 
+        'angularjs' : 'angular-frdl', 
+	    'process': '@frdl/process', 
+        'vm': '@frdl/vm',
+		'fs' : '@frdl/fs',
+		'Webfan' : '@frdl/Webfan',		
+		'searching' : 'frdl-searching-finder',
 		
-		
-		frdlalert$ : path.dirname(require.resolve('.')) +  '/assets/node_modules/frdlalert.js',
-		watchFor$ : path.dirname(require.resolve('.')) +  '/assets/node_modules/watchFor.js',
-		jquery$ : path.dirname(require.resolve('.')) +  '/assets/node_modules/jquery.js',
-		'patch-require$' : path.dirname(require.resolve('.')) +  '/assets/node_modules/patch-require.js',
-		
-		
-		'@betafcc/is' : path.dirname(require.resolve('@betafcc/is')), 
+		'request' : 'axios',
+		'https' : 'axios',
+		'http' : 'axios',		
+		'filer.js' : 'patch-filer'
+/*		
+		'@frdl/simple-downloader$' : path.dirname(require.resolve('@frdl/simple-downloader')),
+		'@frdl/helper$' : path.dirname(require.resolve('@frdl/helper')),
+		'@frdl/functions$' : path.dirname(require.resolve('@frdl/functions')),
+		'@frdl/eventemitter$' : path.dirname(require.resolve('@frdl/eventemitter')),
+		'@betafcc/is$' : path.dirname(require.resolve('@betafcc/is')),
+	    '@frdl/frdlweb-api-helper$' : path.dirname(require.resolve('@frdl/frdlweb-api-helper')),
+		'@frdl/magic-overload$' : path.dirname(require.resolve('@frdl/magic-overload')),
+		'frdlalert$' : 'frdl/assets/node_modules/frdlalert',
+		'watchFor$' : 'frdl/assets/node_modules/watchFor',
+		'jquery$' : 'frdl/assets/node_modules/jquery',
+		'patch-require$' : 'frdl/assets/node_modules/patch-require'
+*/		
+	
       })
 };
 
-//console.log(reqConf);
+
 function optimize(content){
   return content;	
 }
 
 
 
+	
 var entry = {};
-entry[WebfanConfig.hps.scriptengine.webpack.main] =  __ASSETS__ +  __ENTRY__ ;	
-WebfanConfig.hps.scriptengine.webpack.automaticNameDelimiter = '~';
-
+//entry[WebfanConfig.hps.scriptengine.webpack.main] =  __ASSETS__ +  __ENTRY__ ;	
+entry[WebfanConfig.hps.scriptengine.webpack.main] =  __dirname + '/assets/' +  __ENTRY__ ;	
+/*
+yield new Promise(function(resolve,reject){ 
+	setTimeout(function(){
+		resolve(true);
+	}, 2500);
+});
+	*/
+	
 var r = yield new Promise(function(resolve, reject){	
 	
 process.chdir(__dirname);
 	
+
 webpack([
   {
-//	baseUrl : Webfan.hps.scriptengine.requirejs.baseUrl,  
-//	context: __dirname,  
-	 //mode : 'none', 
 	 mode : 'production', 
-	// !no mode : 'development', 
-	//amd: {
-	//	
-	//},
 	target: 'web',  
 	entry: entry,
-	node : {
+	node : {	
 	 console: false,
 	 global: true,
 	 process: false,
@@ -1301,8 +866,11 @@ webpack([
 	 url: false,
 	 util: false,
 	 path: false,
-//	__filename: "mock",
-//	__dirname: "mock"//,
+	 https : false,
+	 http : false,	
+	 request : false,
+	 querystring:false,	
+	 vm : false,
 	 __filename:  "mock",
 	 __dirname: "mock",		
 	 setImmediate:  true
@@ -1312,83 +880,14 @@ webpack([
 	namedChunks: true,
       runtimeChunk:false,
       splitChunks: {
-           // chunks: 'all',
-           //  maxInitialRequests: Infinity,
-           //  minSize: 0,
       chunks: 'async',
-      minSize: 0,
-		  
+      minSize: 0,		  
       maxSize: Infinity,
       minChunks: 1,
       maxAsyncRequests: Infinity,
       maxInitialRequests: 1,
-      automaticNameDelimiter: WebfanConfig.hps.scriptengine.webpack.automaticNameDelimiter,			 
-	   /*
-               name(module) {
-				   
-				 
-                    // get the name. E.g. node_modules/packageName/not/this/part.js
-                    // or node_modules/packageName
-				    //  var p = module.context.match(/[\/]node_modules|(.*?)[\/](.*?)([\/]|$)/);
-				    var p = module.context.split(/[\/]node_modules[\/]/);
-				   //  console.log(p);
-				   
-                     const packageName =p[1] || p[0];
-                   //  console.log(packageName);
-				   
-                      // npm package names are URL-safe, but some servers don't like @ symbols
-                     var n = `${packageName.replace('@', '')}`;
-				   
-				   return n;
-                 },		  
-		 
-      cacheGroups: {
-         vendor: {
-               test: /node_modules/,
-               name(module) {
-				   
-				 
-                    // get the name. E.g. node_modules/packageName/not/this/part.js
-                    // or node_modules/packageName
-				    //  var p = module.context.match(/[\/]node_modules|(.*?)[\/](.*?)([\/]|$)/);
-				    var p = module.context.split(/[\/]node_modules[\/]/);
-				   //  console.log(p);
-				   
-                     const packageName =p[1] || p[0];
-                   //  console.log(packageName);
-				   
-                      // npm package names are URL-safe, but some servers don't like @ symbols
-                     var n = `${packageName.replace('@', '')}`;
-				   
-				   return n;
-                 },
-             reuseExistingChunk: true
-             },
-        default: {
-          name(module) {
-				   
-				 
-                    // get the name. E.g. node_modules/packageName/not/this/part.js
-                    // or node_modules/packageName
-				    //  var p = module.context.match(/[\/]node_modules|(.*?)[\/](.*?)([\/]|$)/);
-				    var p = module.context.split(/[\/]node_modules[\/]/);
-				   //  console.log(p);
-				   
-                     const packageName =p[1] || p[0];
-                   //  console.log(packageName);
-				   
-                      // npm package names are URL-safe, but some servers don't like @ symbols
-                     var n = `${packageName.replace('@', '')}`;
-				   
-				   return n;
-                 },
-		  maxSize: 1000000,	
-          minChunks: 2,
-          priority: -20,
-          reuseExistingChunk: true
-        }
-      }
-	 */ 
+      automaticNameDelimiter: WebfanConfig.hps.scriptengine.webpack.automaticNameDelimiter		 
+
   }	
 },
   
@@ -1397,150 +896,134 @@ webpack([
 		path: O.path,
 		publicPath: WebfanConfig.hps.scriptengine.webpack.__PUBLIC_PATH__,
 		chunkFilename: '[name].[hash].bundle.js',
-		 filename: '[name].[hash].bundle-webpack.js',
-		//filename: WebfanConfig.hps.scriptengine.webpack.main + '.' + pkg.version + '.js',
-	//	filename: WebfanConfig.hps.scriptengine.webpack.main + '.js',
-	  //  library: '[name].[hash]',
-		library: WebfanConfig.hps.scriptengine.webpack.main,
-		
-	    // libraryTarget: "umd",
-	   libraryTarget: "umd2",
-	  //  libraryTarget: "amd",
+	    filename: '[name].[hash].bundle-webpack.js',
+	 	library: WebfanConfig.hps.scriptengine.webpack.main,   
+	    libraryTarget: "umd2",	
         umdNamedDefine: true,
-		 globalObject: 'this',
-		
-		
+		globalObject: 'this',		
 		devtoolModuleFilenameTemplate: info => {     
-				// return `webpack:///${info.resourcePath}?${info.loaders}`;
 				 return `webpack:///${info.namespace}/${info.id}?${info.loaders}`;
 		}
 	},
-	  /* 
- externals:[
-	
+/*
+var webpackRequireHttp = r"equire('w"ebpack-require-http');
+
+var custom1Function = webpackRequireHttp.custom({
+    rules:{
+        '^#(.+)\/(.+)':'http://static.something.com/$1/$2.js'
+    }
+});
+
+custom1Function('', '#api/sdk', function(err, content) {
+    console.log('TEST2', content); // script, src=http://static.something.com/api/sdk.js
+});
+
+var custom2Function = webpackRequireHttp.custom({
+    rules:function(context, request) {
+        if(request && request.indexOf('//') == 0) {
+            return 'http:' + request;
+        }
+        return request;
+    }
+});
+
+custom2Function('', '//something.com/index.js', function(err, content) {
+    console.log('TEST3', content); // script, src=http://something.com/index.js
+});
+*/
+    externals:[
         webpackRequireHttp.custom({
             rules:{
-                '^#bin\/(.+)':'https://js.frdl.de/$1',
-				'^#cdn\:\/\/(.+)':'https://domainundhomepagespeicher.webfan.de/cdn/application/webfan/node_modules/$1'
+              //  '^#api\/common':'http://static.domain.com/api/common.js',
+				'^#cdn\:frdlweb\/([^\/]+)\/(.+)': WebfanConfig.hps.scriptengine.requirejs.baseUrl + '$1/$2.js',
+				'^#cdn\:frdlweb\/([^\/]+[^\/])$': WebfanConfig.hps.scriptengine.requirejs.baseUrl + '$1.js'
             }
         })
-		
     ],	  
-	  */
+	 	
  resolve: {
-	 
-	
-    // options for resolving module requests
-    // (does not apply to resolving to loaders)
-    modules: [
-
-		
-      "node_modules",
-      "assets/node_modules",
-      './node_modules',
-   //  path.resolve(__dirname, '.'),		
-	  path.resolve(__dirname, "node_modules"),
-      path.resolve(__dirname, "assets"),
-      path.resolve(__dirname, "assets/node_modules"),
-	//  path.resolve(__dirname, "ws-configs/")
-	
-	  path.resolve(__dirname, "bin"),	
-		
-		
-	 path.resolve(__dirname, "node_modules"),
-   //   path.resolve(__PROJECT_DIR__, '.'),		
-	  path.resolve(__PROJECT_DIR__, "node_modules"),
-      path.resolve(__PROJECT_DIR__, "assets"),
-      path.resolve(__PROJECT_DIR__, "assets/node_modules"),
-		
-	  path.resolve(__PROJECT_DIR__, __MODULES_DIR__),
-	  WebfanConfig.hps.scriptengine.requirejs.baseUrl,
+    modules: [	
+//	  path.resolve(__dirname ,'assets'),
+	  path.resolve(__dirname ,'../..'),
+	  path.resolve(__dirname ,'assets/node_modules'),
+	  path.resolve(__dirname ,'../../node_modules')
     ],
 	 alias :  O.alias,
 	 extensions: ['.js'] // File types
 },
 module: {
-   // noParse: /requirejs|uglify\-browser|filer/,  //|betafcc\/is
-	noParse: /requirejs|uglify\-browser|angular\-frdl/,  //|betafcc\/is
+	noParse: /requirejs|uglify\-browser|(angular)|nodules/, 
     rules: [
-	 /* 
-	 {
-         test: require.resolve('./assets/test.js'),
-         use: 'imports-loader?this=>window'
-       },	
 		
        {
-        test:  require.resolve('@frdl/requirejs'),
-        use: [
-          {
-            loader: `script-loader`
-          }
-        ]
-      },
-	
-		 {
-         test: [require.resolve('@frdl/requirejs')].join('|'),
-         use: 'expose-loader?$'
-       }, 
-	   
-       {
-         test: require.resolve('./index.js'),
-         use: 'expose-loader?frdl'
-       }, 		
-			   
-	  	
-       {
-         test:require.resolve('jquery'),
-         use: 'expose-loader?global.$'
-       }, 
-	   */ 			
-  //     {
-   ///      test:/requirejs/,
-    //     use: 'expose-loader?__requirejs__loaded_module__'
-    //   }, 
-		
-      {
-         test: require.resolve('@frdl/process'),
+         test: new RegExp(preg_quote('@frdl/process')),
          use: 'expose-loader?process'
        }, 			
-	  /* 	
-         {
-         test:/angular/,
-         use: 'expose-loader?angular'
-       },   
-		*/
-		{
+/*	
+			{
 			
-      test: /(\.js)$/,
-   //   exclude: /(node_modules|bower_components)/,
-	//  exclude: /(assets)/,		
-	  exclude : new RegExp('^(' + preg_quote(__ENTRY__) +')|(index)|(betafcc\/is)|(patch\-require)|(uglify\-browser)|(angular\-frdl)|^co$'),		
-      use: [{
-        // babel-loader to convert ES6 code to ES5 + amdCleaning requirejs code into simple JS code, taking care of modules to load as desired
+     test: /(\.js)$/,
+	 exclude : new RegExp('nodules'),		
+      use: [{     
         loader: 'babel-loader',
         options: {
 			
           presets: [
-					  '@babel/preset-env',
-			        //   require('babel-preset-es2015')
-			         // 'es2015',
-			        //   require('babel-preset-es2015')
+					  '@babel/preset-env'
 				   ],
           plugins: [ 
 			    "@babel/plugin-syntax-dynamic-import",
-			 //    ["@babel/plugin-transform-runtime", {                         
-              //                 "regenerator": false
-               //    }], 
-			 // "transform-runtime", 	
-			  //  "@babel/runtime",
-			  //  "@babel/plugin-transform-runtime",
-            //  "@babel/plugin-transform-async-to-generator",
+			    "@babel/plugin-transform-runtime"
+	
+		  ]
+        }
+      }
+	  ]
+    },	
+	
+		
+	*/	
+		{
+			
+      test: /(\.js)$/,
+	 // exclude : new RegExp('^(' + preg_quote(__ENTRY__) +')$|(index)|(betafcc\/is)|(patch\-require)|(uglify\-browser)|(angular\-frdl)|^co$'),	
+	  exclude : /(nodules)|(betafcc\/is)|(webfan)|(require)|(uglify\-browser)|(angular)|^co$/,	
+      use: [{     
+        loader: 'babel-loader',
+        options: {
+			
+          presets: [
+					[
+					 '@babel/preset-env', 
+			         {     
+						  targets: {         
+							  esmodules: true  
+						  },      
+					  }					
+					]
+				   ],
+          plugins: [ 
+			    "@babel/plugin-syntax-dynamic-import",
+			     [
+   
+					 "@babel/plugin-transform-runtime",
+     
+					 {       
+						 "absoluteRuntime": false,      
+						 "corejs": false,    
+						 "helpers": true,     
+						 "regenerator": true,      
+						 "useESModules": true     
+					 }
+   
+				 ]
+	
 		  ]
         }
       }
 	  ]
     },
-		
+	
 	 {
 		 test: /\.png$|\.jpgg$|\.ico$/, 
 		 loader: 'file-loader'
@@ -1548,148 +1031,13 @@ module: {
 				 
     ]
   },
- plugins: [
-	 
-	
-	 
-	 
-	 
-	 new webpack.NamedModulesPlugin(),
-	 
-	 new webpack.BannerPlugin({
-		 banner:'  frdl.js @frdl/frdl ',	
-		 raw :false, 
-		 entryOnly :true
-	 }),	 
-	 
-	 
-	 
-       new WebpackShellPlugin({
-          onBuildStart: [
-			  
-			                   CP+' -rf '+__dirname+'/assets/. '+__PROJECT_DIR__+'/assets/', 
-			          //         'rm -rf ' + __DIST__ +'/frdl-legacy-component.'+ WebfanConfig.hps.scriptengine.hash +'.js'
-						],
-		  onBuildEnd : [
-								     //     CP+' -rf '+__PROJECT_DIR__+'/assets/logo.jpg ' + __DIST__ +'/logo.jpg',
-									 //  CP+' -rf '+__PROJECT_DIR__+'/assets/. ' + __DIST__ +''	  
-          ],
-          onBuildExit: (__PROJECT_DIR__ === __dirname && 'root' === process.env.USER) 
-		                            ? [ 
+	  
+ plugins: [	 
+	 new webpack.NamedModulesPlugin(),	   	 
+	 new WebfanInjectConfigPlugin(WebfanConfig.hps.scriptengine.webpack.main, WebfanConfig, configWebfanLoader ),		 
+     new webpack.ProvidePlugin(sanitize(WebfanConfig.hps.scriptengine.requirejs.shim)), 
 
-									  ] 
-		                            : [
-									
-								   	  //   CP+' -rf '+__PROJECT_DIR__+'/assets/frdl-legacy.js ' + __DIST__ +'/frdl-legacy.js',
-				  CP+' -rf '+__PROJECT_DIR__+'/assets/frdl-legacy-app.'+ config.hps.scriptengine.hash +'.js ' + __DIST__ +'/frdl-legacy-app.'+ WebfanConfig.hps.scriptengine.hash +'.js',
-										
-										
-				  CP+' -rf '+__dirname+'/assets/frdl-legacy-component.js ' + __DIST__ +'/frdl-legacy-component.'+ WebfanConfig.hps.scriptengine.hash +'.js',
-					
-					 CP+' -rf '+__dirname+'/assets/dsgvo-adsense.js ' + __DIST__ +'/dsgvo-adsense.'+ WebfanConfig.hps.scriptengine.hash +'.js',					
-										
-										//WebfanConfig.hps.scriptengine.webpack.main + '.' + pkg.version + '.js',
-										
-//CP+' -rf '+__DIST__+'/'+ WebfanConfig.hps.scriptengine.webpack.main + WebfanConfig.hps.scriptengine.webpack.automaticNameDelimiter + '* '
-//										+__DIST__+'/'+ WebfanConfig.hps.scriptengine.webpack.main + '.' + pkg.version + '.js ',
-										
-//CP+' -rf '+__DIST__+'/'+ WebfanConfig.hps.scriptengine.webpack.main + WebfanConfig.hps.scriptengine.webpack.automaticNameDelimiter + '* '
-//										+__DIST__+'/'+ WebfanConfig.hps.scriptengine.webpack.main + '.js ',
-										
-						  CP+' -rf '+__dirname+'/assets/home.view.html ' + __DIST__ +'/home.view.html',	
-									],
-		   safe: true
-      }),	 
-	 
-	
-	 
-       
-	 
-        new SaveRemoteFilePlugin([
-          //  {
-          //      url: __PROTOCOL__+'//'+__HOST__+'/app.js',
-         //       filepath: 'app.legacy.js',
-         //   },
-			
-             {
-                 url: __PROTOCOL__+'//'+__HOST__+'/logo.jpg',
-                 filepath: 'logo.jpg',
-             },			
-        ]),
-	 
-	 /*
-	new CopyWebpackPlugin([
-		
-
-
-
-      {
-        from: path.resolve(__PROJECT_DIR__, 'assets')+'',
-        to:O.path,
-        transform(content, path) {
-			//console.log('path', path);
-		//	console.log('content', content);
-            return Promise.resolve(optimize(content));
-        },
-        cache: false,
-	    transformPath(targetPath, absolutePath) {		
-		//	console.log('targetPath', targetPath);
-		//	console.log('absolutePath', absolutePath);
-		// if(!/(\.js)/.test(	targetPath))return targetPath;
-          //return targetPath.replace(/(assets\/)/, '/');
-			 return targetPath;
-        }
-      },
-
-    ]),
-	*/
-
-      
-	 new WebfanInjectConfigPlugin(WebfanConfig.hps.scriptengine.webpack.main, WebfanConfig, configWebfanLoader ),
-		
-	 new HtmlWebpackPlugin({
-		  inject : 'head',
-		  filename: 'index.html',
-		  entry: 'index.html',
-		  template:__ASSETS__ + 'index.html' ,
-		  title : pwaManifest.name,
-		  hash_hps : WebfanConfig.hps.scriptengine.hash
-		  //favicon :   'favicon.ico'//,
-		//  logo : 'logo.[hash].jpg',
-	  }), 
-	 	
-	 
-		 
-	 new HtmlWebpackPlugin(
-	  {
-		  inject : 'head',
-		  filename: 'webfan.html',
-		  entry: 'webfan.html',
-		  template:__ASSETS__ + 'webfan.html' ,
-		  title : pwaManifest.name,
-		  hash_hps : WebfanConfig.hps.scriptengine.hash
-		  //favicon :   'favicon.ico'//,
-		//  logo : 'logo.[hash].jpg',
-	  }), 
-	 
-	 
-	 
-	 
-	 new HtmlWebpackPlugin(
-	  {
-		  inject : 'head',
-		  filename: 'blank.html',
-		  entry: 'blank.html',
-		  template:__ASSETS__ + 'blank.html' ,
-		  title : pwaManifest.name,
-		  hash_hps : WebfanConfig.hps.scriptengine.hash
-		  //favicon :   'favicon.ico'//,
-		//  logo : 'logo.[hash].jpg',
-	  }), 
-	 
-	 
-		 
-      new webpack.ProvidePlugin(sanitize(WebfanConfig.hps.scriptengine.requirejs.shim)),
+/*
 	  new BabelMinifyPlugin({   
 		  "mangle": {     
 			  "keepFnName": true,
@@ -1701,124 +1049,47 @@ module: {
 		  }
  
 	  }),
-
-  new WebpackPwaManifest(extend(pwaManifest,{
-    name: pwaManifest.name,
-    short_name: pwaManifest.short_name,
-    description: pwaManifest.description,
-    background_color: '#ffffff',
-    crossorigin: 'use-credentials', //can be null, use-credentials or anonymous
-    icons: [
-      {
-        src:__ASSETS__ + 'favicon.ico',
-        sizes: [16, 32, 96] // multiple sizes
-      },
-      {
-        src: __ASSETS__ +'icon128.png',
-        sizes: [128, 192, 256, 384, 512, 1024] // you can also use the specifications pattern
-      },
-      {
-        src: __ASSETS__ +'logo.jpg',
-        sizes: ['364x68'] // you can also use the specifications pattern
-      }
-    ]
-  })),	 
+	 	*/
 	 
       new requirejsPlugin({
             path: O.path,
-           filename: WebfanConfig.hps.scriptengine.webpack.__CONFIG_MAIN_NEXT_BUNDLE_FILENAME__,
-		  // filename: __CONFIG__ + '.[hash].bundle.js',
-          baseUrl : Webfan.hps.scriptengine.requirejs.baseUrl,
-		   //   baseUrl : '',
+            //filename: WebfanConfig.hps.scriptengine.webpack.__CONFIG_MAIN_NEXT_BUNDLE_FILENAME__,		
+		    filename : __CONFIG_MAIN_NEXT_BUNDLE_FILENAME__,
+            baseUrl : WebfanConfig.hps.scriptengine.requirejs.baseUrl,
             pathUrl : '',
             processOutput: function (assets) {
-				assets = extend(sanitize(WebfanConfig.hps.scriptengine.requirejs), assets);
+				assets =extend(sanitize(WebfanConfig.hps.scriptengine.requirejs), assets);
 				assets.paths = extend(O.alias, assets.paths);
 				var k;
 				for(k in assets.paths){
 				  assets.paths[k] = str_replace(__dirname, '.', assets.paths[k]);
-				  assets.paths[str_replace('$', '', k)] = assets.paths[k];
+				//  assets.paths[str_replace('$', '', k)] = assets.paths[k];
 				  if(/\$/.test(k)){
 					  delete assets.paths[k];	
 				  }
 				}
-			//	delete assets.paths.main;
-			//	delete assets.map;
-                var code = '(function(){require.config(' + JSON.stringify(assets) + ');}());'
-				  //console.log("requirejs configuration set done");
-				//    + "define('Webfan', function(){return require('@frdl/webfan');});"
-				//   + "define('frdl', function(){	return  {}; });"
+
+				//if('undefined'!==typeof assets.shim){
+				//  delete assets.shim;
+				//}
+				var code = '(function(){require.config('+ JSON.stringify(assets) + ');}());'
+
 				  + __CONFIG_MAIN_NEXT_BUNDLE_CONTENT_1__
 				
                    + '\n'
 				   + __CONFIG_MAIN_NEXT_BUNDLE_CONTENT_2__
 				;
-				  //    + 'exports=module.exports=' + JSON.stringify(assets) + ';'
-				
-				
-				var result = UglifyJS.minify(code,  { 
-					toplevel: false,   
-					compress: {       
-						global_defs: {    
-			                   //"@console.log": "alert"      
-						}//,      
-					//	passes: 2   
-					},   
-					output: {   
-						beautify: false,     
-						preamble: "/* fuglyfied */"   
-					}
-				});
-				
-				code = result.code;
-	 
-				
+		
 				code += '\n';
 				code += __CONFIG_MAIN_NEXT_BUNDLE_CONTENT_3__;
 				return code;
             }
-        }),	 		  
-	   //new webpack.NamedModulesPlugin(),
+        }),	 		 
 	 
-		  
-		   new webpack.ExtendedAPIPlugin(),
-		  
-	 // new NodeSecurityPlugin(),
 	 
-		/*	
-			 new webpack.HashedModuleIdsPlugin({
-  hashFunction: 'sha256',
-  hashDigest: 'hex',
-  hashDigestLength: 20
-}),
-	
-               new NpmInstallPlugin({
-                  // Use --save or --save-dev
-                 dev: function(module, path) {
-                     return Objext.keys(pkg.devDependencies).indexOf(module) !== -1;
-                  },
-                // Install missing peerDependencies
-               peerDependencies: false,
-                 // Reduce amount of console logging
-               quiet: false,
-               // npm command used inside company, yarn is not supported yet
-                npm: 'npm'
-              }),
+	 new webpack.ExtendedAPIPlugin()
+	 
 
-         new DynamicCdnWebpackPlugin({
-                resolver: () => new Promise(resolve => {
-                    setTimeout(() => {
-                        resolve({
-                           var: 'config',
-                            name: 'config',
-                            url: './config.js',
-                            version: ''
-                        });
-                    }, 200);
-                })
-       })	 
-	   ,
-*/
     ]	  
 }
 //	,  { entry: './index2.js', output: { filename: 'bundle2.js' } }
@@ -1829,7 +1100,7 @@ module: {
 	}else{
 		var str = stats.toString() + '\n';
 		//console.log('stats', Object.keys(stats)); 
-        process.stdout.write(str);
+       process.stdout.write(str);
 		resolve(stats);
 	}
  });
@@ -1840,11 +1111,7 @@ module: {
 });	
 
 	
-//	console.log('done webpack');
-//	console.log('stats', Object.keys(r)); 
-//	console.log('stats', Object.keys(r.stats)); 
-	
-	//process.exit(0);
+
 	return r;
 }, __ENTRY__,
 __MAIN__,   
@@ -1858,11 +1125,12 @@ __PROTOCOL__,
  __MODULES_DIR__,
  __DEFAULTS__).then(function(r){
 	process.chdir(__PROJECT_DIR__);
-	console.log(r.hash);
+	process.stdout.write(r.hash);
 	process.exit(0);
 }).catch(function(e){
 	process.chdir(__PROJECT_DIR__);
 	console.error(e);
+	process.exit(e);
 });	
 	
 	
