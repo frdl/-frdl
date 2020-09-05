@@ -1,9 +1,9 @@
 {
-  "name": "frdl",
-  "description": "frdl.js - Frdlweb frameworks node/javascript part of the developer-workspace edition.",
+  "name": "@frdl/frdl.js",
+  "description": "frdl.js - Frdlweb frameworks javascripting",
   "type": "library",
   "license": "MIT",
-  "version": "4.0.2-beta",	  
+  "version": "4.0.3",
   "keywords": [
     "frdl",
     "frdlweb",
@@ -12,37 +12,32 @@
     "development",
     "project-management"
   ],
-  "homepage": "https://frdl.webfan.de/install/npm/", 
-  "repository" : {
-    "type" : "git",
-    "url": "ssh://git@github.com/frdl/frdl.js.git"
+  "repository" : "git://github.com/frdl/frdl.js.git",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
   },
-  "publishConfig": { 	
-	  "registry": "https://npm.pkg.github.com/"
-   },	  
   "author": {
     "name": "Till Wehowski",
     "email": "github@webfan.de",
     "url": "http://frdl.webfan.de"
   },
-  "contributors": [
-  
-  ],
+  "contributors": [],
   "config": {
     "frdlweb": {}
   },
   "bin": {
     "frdljs": "./frdl",
     "frdl": "./frdl",
-	"req": "./bin/req",
-	"install-remote-files" : "./bin/frdl-install-remote-files"
+    "req": "./bin/req",
+    "install-remote-files": "./bin/frdl-install-remote-files"
   },
   "browser": {
     "fs": "./assets/node_modules/fs.js",
     "amdefine": "./assets/node_modules/amdefine.js"
   },
   "resolutions": {
-    "terser": "3.14.1"
+    "terser": "3.14.1",
+	"frdl" : "@frdl/frdl.js"
   },
   "scripts": {
     "build": "npm run build:install-remote-files && npm run build:browser-lib",
@@ -64,7 +59,7 @@
     "install-mono": "scripts/installEx.js",
     "preinstall:prepare-install": "node ./prepare-install.js"
   },
-  "bugs": "http://github.com/frdl/frdl/issues",
+
   "dependencies": {
     "@babel/core": "^7.9.0",
     "@babel/plugin-syntax-dynamic-import": "latest",
@@ -86,7 +81,6 @@
     "@frdl/webfan": "latest",
     "@frdl/webfantize": "latest",
     "@frdl/var-typing": "latest",
-	"@frdl/transpile-php": "npm:jstophp@^0.2.7",
     "amdefine": "^1.0.1",
     "async-context": "^1.0.0",
     "axios": "^0.18.1",
@@ -94,6 +88,7 @@
     "babel-minify-webpack-plugin": "latest",
     "babel-plugin-transform-async-to-generator": "latest",
     "babel-plugin-transform-runtime": "latest",
+    "babel-preset-php": "^2.0.0",
     "base32-encode": "1.1.1",
     "buffer": "5.6.0",
     "chalk": "*",
@@ -106,30 +101,32 @@
     "copy-webpack-plugin": "^5.1.1",
     "debug": "^4.1.1",
     "dns-packet": "5.2.1",
-	"dotenv" : "8.2.0",
-	"dotenv-expand" : "5.1.0",
+    "dotenv": "8.2.0",
+    "dotenv-expand": "5.1.0",
     "edit-json-file": "^1.2.1",
     "expose-loader": "1.0.0",
     "extensioner": "^1.18.4",
     "feature": "^1.1.0",
     "file-loader": "^3.0.1",
-	"find-up" : "latest",
+    "find-up": "latest",
     "fs-extra": "^9.0.0",
     "imports-loader": "^0.8.0",
     "inline-worker": "^1.1.0",
     "insertion-query": "1.0.4",
     "jayson": "*",
     "jszip": "^3.2.2",
+    "jstophp": "^0.2.7",
+    "js2php": "latest",
     "locutus": "latest",
     "mimemessage": "^1.0.5",
     "module-to-cdn": "^3.1.2",
-	"pkg-conf" : "latest",
+    "pkg-conf": "latest",
     "php-parser": "*",
     "php-reflection": "*",
     "query-string": "6.13.1",
     "raw-loader": "^2.0.0",
     "ready-check": "latest",
-	"read-pkg-up" : "latest",
+    "read-pkg-up": "latest",
     "recursive-readdir": "^2.2.2",
     "require-from-url": "3.1.3",
     "require-from-web": "^1.2.0",
@@ -152,16 +149,14 @@
     "webpack-inject-plugin": "1.5.3",
     "webpack-require-http": "latest",
     "webpack-shell-plugin": "latest",
-	"which-module": "latest"
+    "which-module": "latest"
   },
   "devDependencies": {
-    "single-require":"1.0.1",	  
+    "single-require": "1.0.1",
     "rimraf": "^2.6.2",
-	"pnpm" : "latest"
+    "pnpm": "latest"
   },
-  "peerDependencies": {
-	 
-  },
+  "peerDependencies": {},
   "licenses": [
     {
       "type": "MIT",

@@ -807,6 +807,10 @@ var O = {
 		'Webfan' : '@frdl/Webfan',		
 		'searching' : 'frdl-searching-finder',
 		
+	
+		'frdl' : '@frdl/frdl',	
+		'@frdl/transpile-to-php' : 'jstophp',
+		
 		'request' : 'axios',
 		'https' : 'axios',
 		'http' : 'axios',		
@@ -931,6 +935,7 @@ custom2Function('', '//something.com/index.js', function(err, content) {
     console.log('TEST3', content); // script, src=http://something.com/index.js
 });
 */
+	  
     externals:[
         webpackRequireHttp.custom({
             rules:{

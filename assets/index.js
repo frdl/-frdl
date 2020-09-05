@@ -1148,7 +1148,55 @@ emitter.required([
 					  });
 				   }
 	});  
-	Object.defineProperty(main, 'phpParser', {
+
+
+
+(function(main){
+	'use strict';
+	
+ main.xTranspile = {
+	 php : {}
+ };
+
+	function toPhpA(){
+					  return new Promise(function(resolve, reject){	  
+	                       import('js2php')	 						
+	                      	     .then(function(engine){
+									 resolve(engine.default);
+								 });						  
+					  });		
+	}
+	function toPhpB(){
+					  return new Promise(function(resolve, reject){	  
+	                       import('jstophp')	 						
+	                      	     .then(function(engine){
+									 resolve(engine.default);
+								 });						  
+					  });		
+	}	
+	
+   function	toPhp(){
+	  return new Promise(function(resolve, reject){	  
+		  Promise.all([toPhpA(), toPhpB()]).then(function(rA){
+			  resolve({
+				  engineA : rA[0],
+				  engineB : rA[1] 
+			  });
+		  });
+	  });
+   }
+
+	Object.defineProperty(main.xTranspile.php, 'toPhp', {
+		           get : function(){
+					  return new Promise(function(resolve, reject){	  
+	                       toPhp()	 						
+	                      	     .then(function(engine){
+									 resolve(engine);
+								 });						  
+					  });
+				   }
+	});  
+	Object.defineProperty(main.xTranspile.php, 'parser', {
 		           get : function(){
 					  return new Promise(function(resolve, reject){	  
 	                       import('php-parser')	 						
@@ -1158,7 +1206,7 @@ emitter.required([
 					  });
 				   }
 	});  
-	Object.defineProperty(main, 'phpFunctions', {
+	Object.defineProperty(main.xTranspile.php, 'phpFunctions', {
 		           get : function(){
 					  return new Promise(function(resolve, reject){	  
 	                       import('locutus/php/info')	 						
@@ -1168,6 +1216,23 @@ emitter.required([
 					  });
 				   }
 	});
+
+
+
+	Object.defineProperty(main, 'phpParser', {
+		           get : function(){
+					  return main.xTranspile.php.parser;
+				   }
+	});  
+	Object.defineProperty(main, 'phpFunctions', {
+		           get : function(){
+					  return main.xTranspile.php.phpFunctions;
+				   }
+	});
+
+}(main));
+
+
 	Object.defineProperty(main, 'dnsOverHttps', {
 		           get : function(){
 					  return new Promise(function(resolve, reject){	 						  
@@ -1229,28 +1294,34 @@ emitter.required([
 
 
 
-emitter.once(ev_ready_start, function(){
-	
-	Object.defineProperty(main.frdl, 'co', {
+
+Object.defineProperty(main.frdl, 'co', {
 		           get : function(){					 					     
 					  return require('co');	                                    
 				   }	        
-	});
-	emitter.emit(ev_ready_co, true);
 	
+});
+emitter.once(ev_ready_start, function(){
+	emitter.emit(ev_ready_co, true);
+});	
+	
+
+global.Buffer = require('buffer/').Buffer;   
+emitter.once(ev_ready_start, function(){
+  emitter.emit(ev_ready_buffer, global.Buffer);		
+});
+
+
+emitter.once(ev_ready_start, function(){
 		
 	if('undefined' === typeof Webfan.hps.scriptengine.angularjs.rootSelector){				
 		 Webfan.hps.scriptengine.angularjs.rootSelector = 'body:not([frdl-angularjs-bootstrap*="prepared"])';  			
-	 }  
-	
-    global.Buffer = require('buffer/').Buffer;   
-    emitter.emit(ev_ready_buffer, global.Buffer);	
+	 }    
+  
 
    import('webfan/frdlweb-part/include-lazy-main-members')
      .then(function(members){	
-	    members.default(main, emitter);
-        emitter.emit(ev_ready_include_lazy_members, true);
-	    emitter.emit('ready:frdlweb-components', true);
+	    members.default(main, emitter);     //   emitter.emit(ev_ready_include_lazy_members, true);	//    emitter.emit('ready:frdlweb-components', true);
    });	
 	
 });//once ev_ready_start
@@ -1338,7 +1409,7 @@ main.frdl.watchFor('head:not([frdl-processed*="init-config"]').every(function(el
 
 
 
-(function(main, helper){
+(function(main){
  function loadWorker(main, emitter){
 	global.require(['inline-worker'], function(InlineWorker){
 						      main.frdl.InlineWorker = function(func, varsObject) {								
@@ -1358,9 +1429,12 @@ main.frdl.watchFor('head:not([frdl-processed*="init-config"]').every(function(el
 	}); 
  }
 	
-  	 helper(main.frdl, main.emitter, main)
-			 .then(function(yes){
-					main.emitter.emit(ev_ready_frdl_helper, main.frdl);	 		 
+  	 import('webfan/interpolate'))
+			 .then(function(Mod){
+				     main.frdl.interpolate = (new Mod(main.frdl)).mergeWith(main.frdl);
+				  	 main.emitter.emit(ev_ready_frdl_helper, main.frdl);	 
+	            	 emitter.emit('ready:templater',  main.frdl.templater);
+				 
 		              if('undefined'!==typeof main.emitter.ready && 'undefined'!==typeof main.emitter.ready.readyMain && true === main.emitter.ready.readyMain.stateReady(configEvent) ){
 						  loadWorker(main, main.emitter);
 					  }else{
@@ -1369,7 +1443,7 @@ main.frdl.watchFor('head:not([frdl-processed*="init-config"]').every(function(el
 						  });
 					  }     
 	 });
-}(main, require('@frdl/helper')));
+}(main));
 
 
 
