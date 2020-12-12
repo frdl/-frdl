@@ -7,14 +7,7 @@
     "frdl",
     "frdlweb"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/frdl/frdl.js.git"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
-    "directory" : "frdl.js/packages/frdl"
-  },
+  "repository": "git://github.com/frdl/frdl.js.git",
   "author": {
     "name": "Till Wehowski",
     "email": "github@webfan.de",
