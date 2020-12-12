@@ -12,7 +12,7 @@
     "url": "git://github.com/frdl/frdl.js.git"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/frdl",
+    "registry": "https://npm.pkg.github.com",
     "directory" : "frdl.js/packages/frdl"
   },
   "author": {
