@@ -2,7 +2,7 @@
   "name": "@frdl/frdl",
   "description": "frdl.js - Frdlweb frameworks javascripting",
   "license": "MIT",
-  "version": "5.0.0",
+  "version": "5.0.4",
   "keywords": [
     "frdl",
     "frdlweb"
@@ -15,14 +15,15 @@
 "bin":{
      "frdl": "./bin/frdl"
 },
-"repository": "git://github.com/frdl/frdl.git",
+
   "author": {
     "name": "Till Wehowski",
     "email": "github@webfan.de",
     "url": "http://frdl.webfan.de"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "directory" :"js"
   },
   "dependencies": {
     "commander" : "^7.2.0",
