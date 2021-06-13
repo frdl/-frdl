@@ -13,15 +13,22 @@
     "email": "github@webfan.de",
     "url": "http://frdl.webfan.de"
   },
-
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
-
+    "commander" : "^7.2.0",
+    "winston-daily-rotate-file" : "^4.5.0",
+		"github-app-updater" : "^1.0.5",
+    "degit": "^2.8.4",
+    "@frdl/simple-downloader":"latest",
+    "@frdl/custom-require" :"latest"
   },
   "devDependencies": {
-
+     
   },
   "peerDependencies": {  	
-  	 "@frdl/frdl" : "latest"
+  	 
   },
   "licenses": [
     {
