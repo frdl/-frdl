@@ -15,7 +15,7 @@
 "bin":{
      "frdl": "./bin/frdl"
 },
-
+"repository":"https://github.com/frdl/frdl.js",
    
   "author": {
     "name": "Till Wehowski",
