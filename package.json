@@ -1,5 +1,5 @@
 {
-  "name": "frdl",
+  "name": "@frdl/frdl",
   "description": "frdl.js - Frdlweb frameworks javascripting",
   "license": "MIT",
   "version": "5.0.0",
@@ -7,7 +7,15 @@
     "frdl",
     "frdlweb"
   ],
-  "repository": "git://github.com/frdl/frdl.js.git",
+"scripts":{
+    "postinstall": "npm run postinstall:frdl",
+    "postinstall:frdl": "npm link && npm run postinstall:frdl-package-remotefiles",
+    "postinstall:frdl-package-remotefiles": "frdl package-remotefiles ."
+},
+"bin":{
+     "frdl": "./bin/frdl"
+},
+"repository": "git://github.com/frdl/frdl.js.git",
   "author": {
     "name": "Till Wehowski",
     "email": "github@webfan.de",
@@ -19,7 +27,7 @@
   "dependencies": {
     "commander" : "^7.2.0",
     "winston-daily-rotate-file" : "^4.5.0",
-		"github-app-updater" : "^1.0.5",
+    "github-app-updater" : "^1.0.5",
     "degit": "^2.8.4",
     "@frdl/simple-downloader":"latest",
     "@frdl/custom-require" :"latest"
