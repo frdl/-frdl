@@ -1,10 +1,15 @@
 #!/usr/bin/env node
 
+
+
 const { program } = require('commander');
 
 program
   .version('5.0.0')
+  .command('autoload [filename]', 
+            'Auto installs npm dependencies from the script you want to run and then runs the script' ).alias('load')
   .command('package-remotefiles [dir]', '(Pre-)install required files from remote urls').alias('iweb')
   .command('install-from-git [url] [dir]', 'Install git repository from remote into dir').alias('igit')
   .command('update-from-git [id]', 'Autoupdate from git releases').alias('autoupdate')
   .parse(process.argv);
+
