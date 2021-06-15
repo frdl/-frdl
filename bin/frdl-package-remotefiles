@@ -14,7 +14,7 @@ program
       if ('string'!==typeof options.ext || 0===options.ext.length) {
            options.ext = 'req';
       }
-       fromDir(startPath,filter);
+       fromDir(dir,options.filter);
        console.log(`Finish get remotefiles in ${dir}`);
   });
   
