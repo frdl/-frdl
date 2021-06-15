@@ -45,28 +45,12 @@ program.version('0.0.2');
 
 
 program
-  .arguments('<dir>')
+  .arguments('<filename>')
   .option('-f, --filter <ext>', 'File extension for download flag files e.g. "req"')
-  .action((dir, options, command) => {
-      console.log(`Get remotefiles in ${dir}`);
-      if ('string'!==typeof options.ext || 0===options.ext.length) {
-           options.ext = 'req';
-      }
-       fromDir(dir,options.filter);
-       console.log(`Finish get remotefiles in ${dir}`);
-  });
-  
- 
- if('undefined'!==typeof process.argv){
-    program.parse(process.argv);
- }
- 
- 
+  .action((filename, options, command) => {
+     
 
 
-console.log( process.argv );
-
-const filename = process.argv[2]
 const { resolve } = m.createRequire(path.resolve(filename))
 
 if (!filename) {
@@ -87,6 +71,15 @@ if (deps.length) {
 
 
 spawnSync(process.execPath, process.argv.slice(2), { stdio: 'inherit' })
+  });
+  
+ 
+ if('undefined'!==typeof process.argv){
+    program.parse(process.argv);
+ }
+ 
+ 
+
 
 function unresolved (d) {
   try {
