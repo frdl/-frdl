@@ -2,6 +2,11 @@
 'use strict';
 
 
+const spawn = require('child_process').spawn;
+const path = require('path'), fs=require('fs');
+const argv = process.argv;
+
+
 const { program } = require('commander');
 program.version('0.0.2');
 
@@ -35,10 +40,6 @@ try{
 }catch (e){
     console.log(e);
 }
-
-const spawn = require('child_process').spawn;
-const path = require('path'), fs=require('fs');
-const argv = process.argv;
 
 function ex(cmd, arg){
     var sp = spawn(cmd, arg);
