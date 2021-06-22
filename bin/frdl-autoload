@@ -46,7 +46,7 @@ program.version('0.0.2');
 
 program
   .arguments('<filename>')
-  .option('-f, --filter <ext>', 'File extension for download flag files e.g. "req"')
+  .option('-i, --info <info>', 'Save dependencies to file instead of install')
   .action((filename, options, command) => {
      
 
@@ -64,14 +64,21 @@ const deps = detective(fs.readFileSync(filename))
   .map(onlyModule)
   .filter(dups)
 
-if (deps.length) {
+if(options.info){
+  fs.writeFileSync(options.info, JSON.stringify(deps), (e)=>{
+     if(e)throw e
+  })
+}else{
+
+ if (deps.length) {
   fs.mkdirSync('node_modules', { recursive: true })
   spawnSync('npm', ['install'].concat(deps), { stdio: 'inherit' })
+ }
+
+
+ spawnSync(process.execPath, process.argv.slice(2), { stdio: 'inherit' })
 }
-
-
-spawnSync(process.execPath, process.argv.slice(2), { stdio: 'inherit' })
-  });
+});
   
  
  if('undefined'!==typeof process.argv){
