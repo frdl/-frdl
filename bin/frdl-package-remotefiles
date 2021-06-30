@@ -14,7 +14,7 @@ program.version('0.0.2');
 
 program
   .arguments('<dir>')
-  .option('-f, --filter <ext>', 'File extension for download flag files e.g. "req"')
+  .option('-f, --filter <filter>', 'File extension for download flag files e.g. "req"')
   .action((dir, options, command) => {
       console.log(`Get remotefiles in ${dir}`);
       if ('string'!==typeof options.ext || 0===options.ext.length) {
