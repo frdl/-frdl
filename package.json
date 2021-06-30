@@ -31,7 +31,9 @@
     "github-app-updater": "^1.0.5",
     "degit": "^2.8.4",
     "@frdl/simple-downloader": "latest",
-    "@frdl/custom-require": "latest"
+    "@frdl/custom-require": "latest",
+    "@betafcc/deep-merge": "latest",
+    "detective": "latest"
   },
   "devDependencies": {},
   "peerDependencies": {},
