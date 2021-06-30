@@ -2,9 +2,10 @@
 'use strict';
 
 
-const spawn = require('child_process').spawn;
-const path = require('path'), fs=require('fs');
-const argv = process.argv;
+var spawn = require('child_process').spawn;
+var path = require('path');
+var fs=require('fs');
+var argv = process.argv;
 
 
 const { program } = require('commander');
@@ -19,7 +20,11 @@ program
       if ('string'!==typeof options.ext || 0===options.ext.length) {
            options.ext = 'req';
       }
+     try{
        fromDir(dir,options.filter);
+     }catch(e){
+            console.warn(e);
+       }
        console.log(`Finish get remotefiles in ${dir}`);
   });
   

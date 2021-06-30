@@ -28,15 +28,11 @@ THE SOFTWARE.
 
 
 
-const detective = require('detective')
-const fs = require('fs')
-const path = require('path')
-const m = require('module')
-const { spawnSync } = require('child_process')
-
-
-const spawn = require('child_process').spawn;
-const path = require('path'), fs=require('fs');
+const detective = require('detective');
+const fs = require('fs');
+const path = require('path');
+const m = require('module');
+const { spawnSync } = require('child_process');
 const argv = process.argv;
 
 
@@ -47,9 +43,10 @@ program.version('0.0.2');
 program
   .arguments('<filename>')
   .option('-i, --info <info>', 'Save dependencies to file instead of install')
+  .option('-r, --run [run]', 'Run the filename after install or reading')
   .action((filename, options, command) => {
      
-
+'use strict';
 
 const { resolve } = m.createRequire(path.resolve(filename))
 
@@ -71,32 +68,24 @@ if(options.info){
 }else{
 
  if (deps.length) {
-  fs.mkdirSync('node_modules', { recursive: true })
+  try{
+    fs.mkdirSync('node_modules', { recursive: true })
+  }catch(e){
+    console.warn(e)
+  }
   spawnSync('npm', ['install'].concat(deps), { stdio: 'inherit' })
  }
 
 
- spawnSync(process.execPath, process.argv.slice(2), { stdio: 'inherit' })
-}
-});
-  
- 
- if('undefined'!==typeof process.argv){
-    program.parse(process.argv);
- }
- 
- 
-
-
-function unresolved (d) {
-  try {
-    resolve(d)
-    return false
-  } catch (_) {
-    return true
-  }
 }
 
+
+if(options.run && false !== options.run && 'false' !== options.run && '0' !== options.run && 0 !== options.run){
+// spawnSync(process.execPath, process.argv.slice(2), { stdio: 'inherit' })
+   spawnSync(process.execPath, ('string'===typeof options.run && fs.existsSync(options.run) ) ? options.run : filename, { stdio: 'inherit' });
+}
+
+//funcs...
 function onlyModule (n) {
   if (n[0] === '@') return n.split('/').slice(0, 2).join('/')
   return n.split('/')[0]
@@ -106,4 +95,18 @@ function dups (n, i, all) {
   return all.indexOf(n) === i
 }
 
-
+function unresolved (d) {
+  try {
+    resolve(d)
+    return false
+  } catch (_) {
+    return true
+  }
+}
+});
+  
+ 
+ if('undefined'!==typeof process.argv){
+    program.parse(process.argv);
+ }
+ 

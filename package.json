@@ -2,15 +2,14 @@
   "name": "@frdl/frdl",
   "description": "frdl.js - Frdlweb frameworks javascripting",
   "license": "MIT",
-  "version": "5.0.6",
+  "version": "5.0.13",
   "keywords": [
     "frdl",
     "frdlweb"
   ],
   "scripts": {
-    "postinstall": "npm run postinstall:frdl",
     "postinstall:frdl": "npm link && npm run postinstall:frdl-package-remotefiles",
-    "postinstall:frdl-package-remotefiles": "frdl package-remotefiles ."
+    "postinstall:frdl-package-remotefiles": "frdl package-remotefiles ./"
   },
   "bin": {
     "frdl": "./bin/frdl"
@@ -27,6 +26,7 @@
   "dependencies": {
     "commander": "^7.2.0",
     "winston-daily-rotate-file": "^4.5.0",
+    "winston":">=3",
     "github-app-updater": "^1.0.5",
     "degit": "^2.8.4",
     "@frdl/simple-downloader": "latest",
